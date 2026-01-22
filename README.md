@@ -1,19 +1,29 @@
-# Projet Strapi + Next.js
+# Projets
 
-Projet monorepo contenant :
-- **cms/** : Backend Strapi (CMS headless)
-- **site/** : Frontend Next.js
+Ce dépôt contient plusieurs projets, chacun dans son propre dossier.
 
-## Prérequis
+## Structure
+
+```
+.
+├── Nexiah/       # Projet Nexiah
+│   ├── cms/      # Backend Strapi
+│   └── site/     # Frontend Next.js
+└── README.md
+```
+
+## Projet Nexiah
+
+### Prérequis
 
 - Node.js >= 20.0.0
 - npm >= 6.0.0
 
-## Installation
+### Installation
 
 ```bash
 # Installer les dépendances pour Strapi
-cd cms
+cd Nexiah/cms
 npm install
 
 # Installer les dépendances pour Next.js
@@ -21,25 +31,25 @@ cd ../site
 npm install
 ```
 
-## Démarrage
+### Démarrage
 
-### Strapi (CMS)
+#### Strapi (CMS)
 ```bash
-cd cms
+cd Nexiah/cms
 npm run dev
 ```
 Strapi sera accessible sur http://localhost:1337
 
-### Next.js (Site)
+#### Next.js (Site)
 ```bash
-cd site
+cd Nexiah/site
 npm run dev
 ```
 Next.js sera accessible sur http://localhost:3000
 
-## Configuration
+### Configuration
 
-1. Créer un fichier `.env.local` dans `site/` avec :
+1. Créer un fichier `.env.local` dans `Nexiah/site/` avec :
    ```
    NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
    ```
@@ -47,12 +57,3 @@ Next.js sera accessible sur http://localhost:3000
 2. Configurer les permissions dans Strapi Admin :
    - Settings → Users & Permissions → Roles → Public
    - Activer les permissions pour vos collections
-
-## Structure
-
-```
-.
-├── cms/          # Backend Strapi
-├── site/         # Frontend Next.js
-└── README.md
-```

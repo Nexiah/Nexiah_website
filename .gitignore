@@ -36,12 +36,12 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Strapi
-cms/.tmp/
-cms/cache/
-cms/build/
-cms/dist/
-cms/.strapi/
+# Strapi (pour tous les projets)
+**/cms/.tmp/
+**/cms/cache/
+**/cms/build/
+**/cms/dist/
+**/cms/.strapi/
 
 # Database
 *.db
