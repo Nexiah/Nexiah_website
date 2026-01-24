@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_section_steps_timelines",
+  "info": {
+    "displayName": "steps_timeline"
+  },
+  "options": {},
+  "attributes": {
+    "title_step": {
+      "type": "string"
+    },
+    "description_step": {
+      "type": "text"
+    },
+    "icon_name": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

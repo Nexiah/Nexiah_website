@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_section_arguments",
+  "info": {
+    "displayName": "argument"
+  },
+  "options": {},
+  "attributes": {
+    "title_section": {
+      "type": "string"
+    },
+    "description_section": {
+      "type": "text"
+    },
+    "argument_list": {
+      "type": "component",
+      "component": "section.argument-section",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

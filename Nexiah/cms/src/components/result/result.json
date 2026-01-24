@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_result_results",
+  "info": {
+    "displayName": "Result"
+  },
+  "options": {},
+  "attributes": {
+    "Result": {
+      "type": "blocks"
+    }
+  },
+  "config": {}
+}

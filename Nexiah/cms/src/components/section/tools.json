@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_section_tools",
+  "info": {
+    "displayName": "Tools"
+  },
+  "options": {},
+  "attributes": {
+    "title_section": {
+      "type": "string"
+    },
+    "description_section": {
+      "type": "text"
+    },
+    "tools_list": {
+      "type": "component",
+      "component": "section.tools-list",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

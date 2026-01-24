@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_solution_solutions",
+  "info": {
+    "displayName": "Solution"
+  },
+  "options": {},
+  "attributes": {
+    "Solution": {
+      "type": "blocks"
+    }
+  },
+  "config": {}
+}

@@ -1,0 +1,30 @@
+{
+  "kind": "singleType",
+  "collectionName": "contacts",
+  "info": {
+    "singularName": "contact",
+    "pluralName": "contacts",
+    "displayName": "Contact"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "cal_booking_url": {
+      "type": "string"
+    },
+    "show_calendar": {
+      "type": "boolean"
+    },
+    "email_placeholder": {
+      "type": "string"
+    }
+  }
+}

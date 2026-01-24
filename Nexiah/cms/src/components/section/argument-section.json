@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_section_argument_sections",
+  "info": {
+    "displayName": "argument_section"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "icon_name": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

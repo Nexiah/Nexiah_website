@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_section_expertise",
+  "info": {
+    "displayName": "expertise"
+  },
+  "options": {},
+  "attributes": {
+    "title_section": {
+      "type": "string"
+    },
+    "description_section": {
+      "type": "text"
+    },
+    "expertise_list": {
+      "type": "component",
+      "component": "section.expertises",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

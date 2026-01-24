@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_section_heroes",
+  "info": {
+    "displayName": "hero"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "text"
+    },
+    "cta_text": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

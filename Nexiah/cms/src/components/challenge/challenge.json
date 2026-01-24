@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_challenge_challenges",
+  "info": {
+    "displayName": "Challenge"
+  },
+  "options": {},
+  "attributes": {
+    "Challenge": {
+      "type": "blocks"
+    }
+  },
+  "config": {}
+}

@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "projects",
+  "info": {
+    "singularName": "project",
+    "pluralName": "projects",
+    "displayName": "Project"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "Slug": {
+      "type": "uid"
+    },
+    "Summary": {
+      "type": "richtext"
+    },
+    "Category": {
+      "type": "enumeration",
+      "enum": [
+        "Dev",
+        "Automation ",
+        "PM"
+      ]
+    },
+    "Cover": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": [
+        "challenge.challenge",
+        "solution.solution",
+        "automation.automation",
+        "result.result"
+      ]
+    }
+  }
+}

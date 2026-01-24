@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_automation_automations",
+  "info": {
+    "displayName": "Automation"
+  },
+  "options": {},
+  "attributes": {
+    "Automation": {
+      "type": "blocks"
+    }
+  },
+  "config": {}
+}
