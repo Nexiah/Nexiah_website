@@ -18,9 +18,19 @@ export default [
             "'self'",
             'data:',
             'blob:',
+            'market-assets.strapi.io', // Recommandé par Strapi
             'https://cdn.jsdelivr.net',
             'https://cdnjs.cloudflare.com',
+            'res.cloudinary.com',      // 👈 Ajout pour Cloudinary
           ],
+          'media-src': [
+            "'self'",
+            'data:',
+            'blob:',
+            'market-assets.strapi.io',
+            'res.cloudinary.com',      // 👈 Ajout pour Cloudinary (vidéos/audios)
+          ],
+          upgradeInsecureRequests: null,
         },
       },
     },
