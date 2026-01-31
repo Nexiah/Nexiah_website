@@ -35,9 +35,6 @@ export async function generateMetadata(): Promise<Metadata> {
     globalData = await getGlobalData();
   } catch (error) {
     // En cas d'erreur, utiliser les valeurs par défaut
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[Layout] Failed to fetch Global data for metadata:', error);
-    }
   }
   
   // Extraire le siteName (gérer PascalCase et camelCase)
@@ -59,9 +56,6 @@ export async function generateMetadata(): Promise<Metadata> {
       }
     } catch (error) {
       // Ignorer les erreurs de formatage d'image
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('[Layout] Failed to format favicon URL:', error);
-      }
     }
   }
   

@@ -1,23 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/strapi';
-
-interface StrapiProject {
-  id: number;
-  attributes: {
-    title: string;
-    slug: string;
-    summary?: string;
-    description?: string;
-    cover?: {
-      data?: {
-        attributes?: {
-          url: string;
-          alternativeText?: string;
-        };
-      };
-    };
-  };
-}
+import { StrapiProject } from '@/lib/types/strapi';
 
 export async function GET(request: Request) {
   try {

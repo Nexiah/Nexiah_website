@@ -2,6 +2,7 @@ import { ProjectGrid, Project } from "@/components/ui/project-grid";
 import { NavbarServer } from "@/components/sections/NavbarServer";
 import { Footer } from "@/components/layout/Footer";
 import { getCollection } from "@/lib/strapi";
+import { StrapiProject } from "@/lib/types/strapi";
 
 // Fallback data si Strapi n'est pas disponible
 const FALLBACK_PROJECTS: Project[] = [
@@ -58,8 +59,6 @@ export default async function WorkPage() {
   let errorMessage: string | null = null;
 
   try {
-    console.log('[WorkPage] Fetching projects from Strapi...');
-    
     // Essayer d'abord avec populate=* seulement (format le plus simple)
     let response = await getCollection<StrapiProject>('projects', {
       populate: '*',
@@ -67,32 +66,13 @@ export default async function WorkPage() {
     
     // Si ça échoue, essayer sans populate
     if (!response) {
-      console.log('[WorkPage] Retry without populate parameter...');
       response = await getCollection<StrapiProject>('projects');
     }
 
-    console.log('[WorkPage] Strapi response received:', {
-      hasResponse: !!response,
-      hasData: !!response?.data,
-      dataLength: response?.data?.length || 0,
-      responseKeys: response ? Object.keys(response) : [],
-    });
-
     if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[WorkPage] Mapping projects...');
-      }
-      
       projects = response.data.map((item) => {
         // Vérifier la structure de l'item
-        const itemData = (item.attributes || item) as any;
-        
-        if (process.env.NODE_ENV === 'development') {
-          console.log('[WorkPage] Mapping item:', {
-            hasAttributes: !!item.attributes,
-            itemKeys: Object.keys(item).slice(0, 5),
-          });
-        }
+        const itemData = (item as StrapiProject).attributes || item;
 
         // Gérer les deux formats : PascalCase (direct) ou camelCase (attributes)
         const title = itemData.Title || itemData.title || 'Sans titre';
@@ -106,13 +86,6 @@ export default async function WorkPage() {
           // Format direct : Cover est un objet avec url directement accessible
           const coverUrl = itemData.Cover.url || '';
           const coverAlt = itemData.Cover.alternativeText || itemData.Cover.name || '';
-          
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[WorkPage] Cover found:', {
-              hasCover: !!itemData.Cover,
-              coverUrl: coverUrl,
-            });
-          }
           
           // Créer la structure attendue par ProjectGrid
           if (coverUrl) {
@@ -138,20 +111,15 @@ export default async function WorkPage() {
           cover,
         };
       });
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[WorkPage] Successfully mapped ${projects.length} projects`);
-      }
     } else {
       errorMessage = response === null 
         ? 'Impossible de se connecter à Strapi. Vérifiez que le serveur est démarré.'
         : response?.data?.length === 0
         ? 'Aucun projet trouvé dans Strapi.'
         : 'Structure de données inattendue depuis Strapi.';
-      console.warn('[WorkPage]', errorMessage, response);
     }
   } catch (error) {
     errorMessage = error instanceof Error ? error.message : 'Erreur inconnue lors de la récupération des projets.';
-    console.error('[WorkPage] Failed to fetch projects from Strapi:', error);
   }
 
   return (

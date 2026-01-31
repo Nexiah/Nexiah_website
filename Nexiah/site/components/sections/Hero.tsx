@@ -17,20 +17,10 @@ const DEFAULT_SUBTITLE = "Plus qu'un développeur. Je transforme votre vision en
 const DEFAULT_CTA = "Discuter de votre projet";
 
 export function Hero({ title, subtitle, cta_text }: HeroProps = {}) {
-  // Debug en développement
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Hero] Props received:', { title, subtitle, cta_text });
-  }
-
   // Utiliser les valeurs par défaut si non fournies
   const displayTitle = title || DEFAULT_TITLE;
   const displaySubtitle = subtitle || DEFAULT_SUBTITLE;
   const displayCta = cta_text || DEFAULT_CTA;
-
-  // Debug en développement
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Hero] Display values:', { displayTitle, displaySubtitle, displayCta });
-  }
 
   // Parser le titre pour extraire les spans avec text-primary
   const parseTitle = (titleText: string): React.ReactNode => {
@@ -42,18 +32,18 @@ export function Hero({ title, subtitle, cta_text }: HeroProps = {}) {
     // Nettoyer le titre (enlever les espaces en fin)
     titleText = titleText.trim();
 
-    // Nettoyer le titre (enlever les espaces en fin)
-    titleText = titleText.trim();
-
     // Si le titre contient des balises HTML, les parser
     if (titleText.includes('<span')) {
       const parts = titleText.split(/(<span[^>]*>.*?<\/span>)/g);
       return parts.map((part, index) => {
+        // Générer un ID stable basé sur le contenu
+        const partId = `hero-part-${part.slice(0, 20).replace(/\s+/g, '-')}-${index}`;
+        
         if (part.startsWith('<span')) {
           const match = part.match(/<span[^>]*>(.*?)<\/span>/);
           if (match) {
             return (
-              <span key={index} className="text-primary">
+              <span key={partId} className="text-primary">
                 {match[1]}
               </span>
             );
@@ -63,7 +53,7 @@ export function Hero({ title, subtitle, cta_text }: HeroProps = {}) {
         if (part.trim() === '') {
           return null;
         }
-        return <span key={index}>{part}</span>;
+        return <span key={partId}>{part}</span>;
       }).filter(Boolean);
     }
     
@@ -71,27 +61,21 @@ export function Hero({ title, subtitle, cta_text }: HeroProps = {}) {
     // Optionnel : chercher les mots clés à mettre en primary
     const words = titleText.split(' ').filter(word => word.length > 0);
     return words.map((word, index) => {
+      const wordId = `hero-word-${word.slice(0, 10)}-${index}`;
       const cleanWord = word.replace(/[.,!?;:]/g, '');
       if (cleanWord === 'Application' || cleanWord === 'Web' || cleanWord === 'Business') {
         return (
-          <span key={index} className="text-primary">
+          <span key={wordId} className="text-primary">
             {word}{index < words.length - 1 ? ' ' : ''}
           </span>
         );
       }
-      return <span key={index}>{word}{index < words.length - 1 ? ' ' : ''}</span>;
+      return <span key={wordId}>{word}{index < words.length - 1 ? ' ' : ''}</span>;
     });
   };
 
   // Rendu du titre
   const renderedTitle = parseTitle(displayTitle);
-  
-  // Debug en développement
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Hero] Rendered title:', renderedTitle);
-    console.log('[Hero] Rendered title type:', typeof renderedTitle);
-    console.log('[Hero] Rendered title is array:', Array.isArray(renderedTitle));
-  }
 
   return (
     <section className="relative w-full bg-white py-24 sm:py-32 lg:py-40">

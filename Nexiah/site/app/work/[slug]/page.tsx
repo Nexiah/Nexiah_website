@@ -8,6 +8,7 @@ import Link from "next/link";
 import { getCollection, formatImageUrl } from "@/lib/strapi";
 import { notFound } from "next/navigation";
 import { AlertCircle, Code, Zap, TrendingUp, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { StrapiProject, StrapiBlocksContent } from "@/lib/types/strapi";
 
 interface StrapiProject {
   id: number;
@@ -69,7 +70,7 @@ interface StrapiProject {
  * Fonction utilitaire pour rendre le Rich Text de Strapi
  * Gère les formats string, array (Strapi Rich Text), ou HTML
  */
-function renderRichText(content: any): React.ReactNode {
+function renderRichText(content: StrapiBlocksContent): React.ReactNode {
   if (!content) return null;
 
   // Si c'est une string simple
@@ -86,26 +87,30 @@ function renderRichText(content: any): React.ReactNode {
   if (Array.isArray(content)) {
     return (
       <>
-        {content.map((block: any, index: number) => {
+        {content.map((block, index: number) => {
+          // Générer un ID stable pour chaque bloc
+          const blockId = `rich-text-block-${block.type}-${index}`;
+          
           if (block.type === 'paragraph' && block.children) {
             return (
-              <p key={index} className="mb-4">
-                {block.children.map((child: any, childIndex: number) => {
+              <p key={blockId} className="mb-4">
+                {block.children.map((child, childIndex: number) => {
+                  const childId = `${blockId}-child-${childIndex}`;
                   if (child.bold) {
-                    return <strong key={childIndex}>{child.text}</strong>;
+                    return <strong key={childId}>{child.text}</strong>;
                   }
                   if (child.italic) {
-                    return <em key={childIndex}>{child.text}</em>;
+                    return <em key={childId}>{child.text}</em>;
                   }
-                  return <span key={childIndex}>{child.text}</span>;
+                  return <span key={childId}>{child.text}</span>;
                 })}
               </p>
             );
           }
           if (block.type === 'heading' && block.level) {
-            const headingProps = { key: index, className: "font-bold mb-4 mt-6" };
-            const headingContent = block.children?.map((child: any, childIndex: number) => (
-              <span key={childIndex}>{child.text}</span>
+            const headingProps = { key: blockId, className: "font-bold mb-4 mt-6" };
+            const headingContent = block.children?.map((child, childIndex: number) => (
+              <span key={`${blockId}-heading-child-${childIndex}`}>{child.text}</span>
             ));
             
             switch (block.level) {
@@ -128,11 +133,11 @@ function renderRichText(content: any): React.ReactNode {
           if (block.type === 'list' && block.children) {
             const ListTag = block.format === 'ordered' ? 'ol' : 'ul';
             return (
-              <ListTag key={index} className="list-disc pl-6 mb-4">
-                {block.children.map((item: any, itemIndex: number) => (
-                  <li key={itemIndex}>
-                    {item.children?.map((child: any, childIndex: number) => (
-                      <span key={childIndex}>{child.text}</span>
+              <ListTag key={blockId} className="list-disc pl-6 mb-4">
+                {block.children.map((item, itemIndex: number) => (
+                  <li key={`${blockId}-item-${itemIndex}`}>
+                    {item.children?.map((child, childIndex: number) => (
+                      <span key={`${blockId}-item-${itemIndex}-child-${childIndex}`}>{child.text}</span>
                     ))}
                   </li>
                 ))}
@@ -159,16 +164,16 @@ export async function generateStaticParams() {
       return response.data
         .filter((project) => {
           // Gérer les deux formats : PascalCase direct ou attributes
-          const slug = (project as any).Slug || (project as any).attributes?.slug;
+          const slug = (project as StrapiProject).Slug || (project as StrapiProject).attributes?.slug;
           return !!slug;
         })
         .map((project) => {
-          const slug = (project as any).Slug || (project as any).attributes?.slug;
-          return { slug };
+          const slug = (project as StrapiProject).Slug || (project as StrapiProject).attributes?.slug;
+          return { slug: slug || '' };
         });
     }
   } catch (error) {
-    console.warn('Failed to generate static params, Strapi may be unavailable:', error);
+    // Erreur silencieuse, retourner tableau vide
   }
 
   // Retourner un tableau vide si Strapi n'est pas disponible
@@ -180,13 +185,11 @@ export default async function ProjectDetailPage({
 }: {
   params: { slug: string };
 }) {
-  let projectData: any = null;
+  let projectData: StrapiProject['attributes'] | StrapiProject | null = null;
   let allProjects: Array<{ slug: string; title: string }> = [];
   let currentIndex = -1;
 
   try {
-    console.log('[ProjectDetail] Fetching project with slug:', params.slug);
-    
     // Récupérer tous les projets pour la pagination
     const allProjectsResponse = await getCollection<StrapiProject>('projects', {
       populate: '*',
@@ -194,11 +197,11 @@ export default async function ProjectDetailPage({
     });
     
     if (allProjectsResponse?.data && Array.isArray(allProjectsResponse.data)) {
-      allProjects = allProjectsResponse.data.map((item: any) => {
-        const data = item.attributes || item;
+      allProjects = allProjectsResponse.data.map((item) => {
+        const data = (item as StrapiProject).attributes || item;
         return {
-          slug: data.Slug || data.slug || '',
-          title: data.Title || data.title || 'Sans titre',
+          slug: (data as any).Slug || (data as any).slug || '',
+          title: (data as any).Title || (data as any).title || 'Sans titre',
         };
       });
       
@@ -218,9 +221,6 @@ export default async function ProjectDetailPage({
     
     // Si pas de résultat, essayer avec slug (camelCase)
     if (!response?.data || response.data.length === 0) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[ProjectDetail] Retry with slug (camelCase)...');
-      }
       response = await getCollection<StrapiProject>('projects', {
         populate: '*',
         filters: {
@@ -231,115 +231,82 @@ export default async function ProjectDetailPage({
       });
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[ProjectDetail] Response:', {
-        hasResponse: !!response,
-        hasData: !!response?.data,
-        dataLength: response?.data?.length || 0,
-      });
-    }
-
     if (response?.data && response.data.length > 0) {
-      const item = response.data[0] as any;
+      const item = response.data[0] as StrapiProject;
       // Gérer les deux formats : PascalCase direct ou attributes
       projectData = item.attributes || item;
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[ProjectDetail] Project data keys:', Object.keys(projectData).slice(0, 10));
-      }
     }
   } catch (error) {
-    console.warn('Failed to fetch project from Strapi:', error);
+    // Erreur silencieuse, notFound() sera appelé
   }
 
   // Si le projet n'existe pas, afficher 404
   if (!projectData) {
-    console.warn('[ProjectDetail] Project not found for slug:', params.slug);
     notFound();
   }
 
   // Extraire les données en gérant les deux formats
-  const title = projectData.Title || projectData.title || 'Sans titre';
-  const slug = projectData.Slug || projectData.slug || '';
-  const summary = projectData.Summary || projectData.summary;
-  const description = projectData.Description || projectData.description;
+  const title = (projectData as any).Title || (projectData as any).title || 'Sans titre';
+  const slug = (projectData as any).Slug || (projectData as any).slug || '';
+  const summary = (projectData as any).Summary || (projectData as any).summary;
+  const description = (projectData as any).Description || (projectData as any).description;
   
   // Extraire les champs Rich Text depuis sections (composants Strapi)
-  let challenge = projectData.Challenge || projectData.challenge;
-  let solution = projectData.Solution || projectData.solution;
-  let automation = projectData.Automation || projectData.automation;
-  let results = projectData.Results || projectData.results;
+  let challenge: StrapiBlocksContent = (projectData as any).Challenge || (projectData as any).challenge;
+  let solution: StrapiBlocksContent = (projectData as any).Solution || (projectData as any).solution;
+  let automation: StrapiBlocksContent = (projectData as any).Automation || (projectData as any).automation;
+  let results: StrapiBlocksContent = (projectData as any).Results || (projectData as any).results;
   
   // Si les champs sont dans sections (composable Strapi)
   if (projectData.sections && Array.isArray(projectData.sections)) {
-    projectData.sections.forEach((section: any) => {
+    projectData.sections.forEach((section) => {
       // Challenge
       if (section.__component === 'challenge.challenge' || section.__component === 'sections.challenge') {
-        challenge = section.Challenge || section.content || section.text || challenge;
+        challenge = (section as any).Challenge || (section as any).content || (section as any).text || challenge;
       }
       // Solution
       if (section.__component === 'solution.solution' || section.__component === 'sections.solution') {
-        solution = section.Solution || section.content || section.text || solution;
+        solution = (section as any).Solution || (section as any).content || (section as any).text || solution;
       }
       // Automation
       if (section.__component === 'automation.automation' || section.__component === 'sections.automation') {
-        automation = section.Automation || section.content || section.text || automation;
+        automation = (section as any).Automation || (section as any).content || (section as any).text || automation;
       }
       // Results (peut être Result au singulier)
       if (section.__component === 'result.result' || section.__component === 'results.results' || section.__component === 'sections.results') {
-        results = section.Result || section.Results || section.content || section.text || results;
+        results = (section as any).Result || (section as any).Results || (section as any).content || (section as any).text || results;
       }
     });
   }
   
-  const category = projectData.Category || projectData.category;
-  
-  // Logs de debug pour voir ce qui est récupéré (uniquement en développement)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[ProjectDetail] Extracted data:', {
-      title,
-      hasChallenge: !!challenge,
-      hasSolution: !!solution,
-      hasAutomation: !!automation,
-      hasResults: !!results,
-      hasSections: !!projectData.sections,
-      sectionsLength: projectData.sections?.length || 0,
-      sectionsComponents: projectData.sections?.map((s: any) => s.__component) || [],
-    });
-  }
+  const category = (projectData as any).Category || (projectData as any).category;
   
   // Gérer Cover
   let coverUrl: string | null = null;
   let coverAlt: string | undefined;
   
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[ProjectDetail] Cover data:', {
-      hasCover: !!projectData.Cover,
-      coverType: typeof projectData.Cover,
-      coverUrl: projectData.Cover?.url,
-    });
-  }
-  
-  if (projectData.Cover) {
-    if (typeof projectData.Cover === 'string') {
+  const cover = (projectData as any).Cover || (projectData as any).cover;
+  if (cover) {
+    if (typeof cover === 'string') {
       // Cover est directement une URL
-      coverUrl = projectData.Cover;
-    } else if (projectData.Cover.url) {
+      coverUrl = cover;
+    } else if (cover.url) {
       // Cover est un objet avec url directement
-      coverUrl = projectData.Cover.url;
-      coverAlt = projectData.Cover.alternativeText || projectData.Cover.name;
+      coverUrl = cover.url;
+      coverAlt = cover.alternativeText || cover.name;
+    } else if (cover.data?.attributes?.url) {
+      coverUrl = cover.data.attributes.url;
+      coverAlt = cover.data.attributes.alternativeText;
     }
-  } else if (projectData.cover?.data?.attributes?.url) {
-    coverUrl = projectData.cover.data.attributes.url;
-    coverAlt = projectData.cover.data.attributes.alternativeText;
   }
   
   const formattedCoverUrl = coverUrl ? formatImageUrl(coverUrl) : null;
 
   const categories = category ? [category] : [];
-  const date = projectData.publishedAt 
-    ? new Date(projectData.publishedAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-    : projectData.createdAt
-    ? new Date(projectData.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+  const date = (projectData as any).publishedAt 
+    ? new Date((projectData as any).publishedAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+    : (projectData as any).createdAt
+    ? new Date((projectData as any).createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
     : '';
 
   // Déterminer les projets précédent et suivant

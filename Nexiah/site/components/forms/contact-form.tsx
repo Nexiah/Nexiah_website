@@ -56,9 +56,6 @@ export function ContactForm() {
     if (!web3formsKey) {
       setError('La clé API Web3Forms n\'est pas configurée. Veuillez contacter l\'administrateur.');
       setIsSubmitting(false);
-      if (process.env.NODE_ENV === 'development') {
-        console.error('[ContactForm] NEXT_PUBLIC_WEB3FORMS_KEY is not set');
-      }
       return;
     }
 
@@ -74,14 +71,6 @@ export function ContactForm() {
       from_name: `${data.firstname} ${data.name}`,
     };
 
-    // Debug en développement
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[ContactForm] Submitting form with payload:', {
-        ...payload,
-        access_key: '***hidden***',
-      });
-    }
-
     try {
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
@@ -93,11 +82,6 @@ export function ContactForm() {
 
       const result = await response.json();
 
-      // Debug en développement
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[ContactForm] Web3Forms response:', result);
-      }
-
       if (result.success) {
         form.reset();
         setIsSubmitted(true);
@@ -108,16 +92,10 @@ export function ContactForm() {
       } else {
         const errorMessage = result.message || 'Une erreur est survenue lors de l\'envoi du message.';
         setError(errorMessage);
-        if (process.env.NODE_ENV === 'development') {
-          console.error('[ContactForm] Web3Forms error:', result);
-        }
       }
     } catch (err) {
       const errorMessage = 'Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.';
       setError(errorMessage);
-      if (process.env.NODE_ENV === 'development') {
-        console.error('[ContactForm] Submit error:', err);
-      }
     } finally {
       setIsSubmitting(false);
     }
@@ -294,7 +272,7 @@ export function ContactForm() {
               <FormControl>
                 <Textarea
                   placeholder="Décrivez votre projet ou votre question..."
-                  className="min-h-[150px]"
+                  className="min-h-36"
                   rows={6}
                   {...field}
                   value={field.value ?? ''}

@@ -75,11 +75,11 @@ export function Navbar({
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-auto items-center justify-between py-6 md:py-8">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-3">
             {logoUrl ? (
-              <div className="relative h-8 w-8 flex-shrink-0">
+              <div className="relative h-14 md:h-24 w-auto flex-shrink-0">
                 {(() => {
                   const formattedLogoUrl = formatImageUrl(logoUrl);
                   const isLocalhost = formattedLogoUrl.includes('localhost');
@@ -90,7 +90,7 @@ export function Navbar({
                       <img
                         src={formattedLogoUrl}
                         alt={siteName}
-                        className="h-8 w-8 object-contain"
+                        className="h-14 md:h-24 w-auto object-contain"
                       />
                     );
                   }
@@ -98,20 +98,20 @@ export function Navbar({
                     <Image
                       src={formattedLogoUrl}
                       alt={siteName}
-                      width={32}
-                      height={32}
-                      className="h-8 w-8 object-contain"
+                      width={300}
+                      height={150}
+                      className="h-14 md:h-24 w-auto object-contain"
                       unoptimized
                     />
                   );
                 })()}
               </div>
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Zap className="h-5 w-5" />
+              <div className="flex h-14 md:h-24 w-14 md:w-24 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <Zap className="h-8 md:h-12 w-8 md:w-12" />
               </div>
             )}
-            <span className="text-xl font-semibold text-foreground">{siteName}</span>
+            <span className="text-xl md:text-2xl font-semibold text-foreground">{siteName}</span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -148,18 +148,18 @@ export function Navbar({
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetContent side="right" className="w-80 sm:w-96">
               <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
               <div className="flex flex-col h-full px-6">
                 {/* Logo in Sheet */}
                 <div className="mb-8">
                   <Link
                     href="/"
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-3"
                     onClick={() => setOpen(false)}
                   >
                     {logoUrl ? (
-                      <div className="relative h-8 w-8 flex-shrink-0">
+                      <div className="relative h-14 w-auto flex-shrink-0">
                         {(() => {
                           const formattedLogoUrl = formatImageUrl(logoUrl);
                           const isLocalhost = formattedLogoUrl.includes('localhost');
@@ -170,7 +170,7 @@ export function Navbar({
                               <img
                                 src={formattedLogoUrl}
                                 alt={siteName}
-                                className="h-8 w-8 object-contain"
+                                className="h-14 w-auto object-contain"
                               />
                             );
                           }
@@ -178,17 +178,17 @@ export function Navbar({
                             <Image
                               src={formattedLogoUrl}
                               alt={siteName}
-                              width={32}
-                              height={32}
-                              className="h-8 w-8 object-contain"
+                              width={300}
+                              height={150}
+                              className="h-14 w-auto object-contain"
                               unoptimized
                             />
                           );
                         })()}
                       </div>
                     ) : (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                        <Zap className="h-5 w-5" />
+                      <div className="flex h-14 w-14 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                        <Zap className="h-8 w-8" />
                       </div>
                     )}
                     <span className="text-xl font-semibold text-foreground">{siteName}</span>

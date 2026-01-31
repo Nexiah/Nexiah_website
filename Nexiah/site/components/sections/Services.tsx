@@ -8,11 +8,14 @@ import Image from "next/image";
 import { LucideIcon } from "lucide-react";
 import { Layers } from "lucide-react";
 
+import { StrapiMedia } from "@/lib/types/strapi";
+
 // Interface pour un élément d'expertise dans la liste répétable
 interface ExpertiseItem {
+  id?: number | string;
   title_expertise?: string;
   description_expertise?: string;
-  icon_pic?: any; // Media field from Strapi (image uploadée)
+  icon_pic?: StrapiMedia; // Media field from Strapi (image uploadée)
   icon_name?: string; // Nom de l'icône Lucide (texte)
 }
 
@@ -28,7 +31,7 @@ const DEFAULT_TITLE = "Une expertise globale, disponible à la carte.";
 const DEFAULT_DESCRIPTION = "Intervention ciblée ou projet complet : je m'adapte à vos besoins.";
 
 // Fonction pour extraire l'URL d'une image depuis le champ icon_pic (média Strapi)
-function getIconImageUrl(iconPic: any): string | null {
+function getIconImageUrl(iconPic: StrapiMedia | null | undefined): string | null {
   if (!iconPic) {
     return null;
   }
@@ -54,25 +57,16 @@ function getSmartIcon(expertise: ExpertiseItem): {
   // Priorité 1 : icon_pic (image uploadée)
   const imageUrl = getIconImageUrl(expertise.icon_pic);
   if (imageUrl) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Services] getSmartIcon: Using image from icon_pic');
-    }
     return { type: 'image', imageUrl };
   }
 
   // Priorité 2 : icon_name (nom de l'icône Lucide)
   if (expertise.icon_name && expertise.icon_name.trim()) {
     const iconComponent = getLucideIcon(expertise.icon_name);
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Services] getSmartIcon: Using Lucide icon "${expertise.icon_name}"`);
-    }
     return { type: 'lucide', iconComponent };
   }
 
   // Fallback : icône par défaut
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Services] getSmartIcon: Using default icon (Layers)');
-  }
   return { type: 'default', iconComponent: Layers };
 }
 
@@ -85,30 +79,10 @@ export function Services({
   const displayTitle = title_section || DEFAULT_TITLE;
   const displayDescription = description_section || DEFAULT_DESCRIPTION;
   
-  // Debug en développement
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Services] Props received:', {
-      title_section,
-      description_section,
-      expertises_list,
-      expertises_list_length: expertises_list?.length,
-      expertises_list_type: typeof expertises_list,
-      expertises_list_isArray: Array.isArray(expertises_list),
-    });
-  }
-  
   // Gérer le cas où expertises_list est vide ou undefined
   const expertises = expertises_list && Array.isArray(expertises_list) && expertises_list.length > 0
     ? expertises_list
     : [];
-  
-  // Debug en développement
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Services] Processed expertises:', {
-      expertises,
-      expertisesLength: expertises.length,
-    });
-  }
   return (
     <section id="services" className="w-full bg-slate-50 py-24 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -140,10 +114,12 @@ export function Services({
               const smartIcon = getSmartIcon(expertise);
               const title = expertise.title_expertise || '';
               const description = expertise.description_expertise || '';
+              // Générer un ID stable : utiliser id Strapi si disponible, sinon combinaison title + index
+              const stableId = expertise.id || `expertise-${title.replace(/\s+/g, '-').slice(0, 30)}-${index}`;
 
               return (
                 <motion.div
-                  key={`expertise-${index}-${title}`}
+                  key={stableId}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}

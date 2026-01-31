@@ -1,5 +1,6 @@
 import { getGlobal } from "@/lib/strapi";
 import { Navbar } from "./Navbar";
+import { StrapiMedia, StrapiNavigationItem } from "@/lib/types/strapi";
 
 // Interface pour les données de navigation
 export interface NavigationLink {
@@ -11,8 +12,8 @@ export interface NavigationLink {
 export interface GlobalData {
   siteName?: string;
   SiteName?: string;
-  logo?: any;
-  navigation?: NavigationLink[] | any;
+  logo?: StrapiMedia;
+  navigation?: NavigationLink[] | StrapiNavigationItem[] | any;
 }
 
 // Liens de navigation par défaut
@@ -30,9 +31,7 @@ export async function NavbarServer() {
   try {
     globalData = await getGlobal();
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[NavbarServer] Failed to fetch Global data:', error);
-    }
+    // Erreur silencieuse, utiliser fallback
   }
 
   // Extraire le siteName (gérer PascalCase et camelCase)
@@ -60,7 +59,7 @@ export async function NavbarServer() {
     // Si c'est un tableau de composants navigation
     if (Array.isArray(nav)) {
       navigationLinks = nav
-        .map((item: any) => {
+        .map((item: StrapiNavigationItem) => {
           // Gérer différentes structures
           const href = item.href || item.Href || item.url || item.Url || '';
           const label = item.label || item.Label || item.name || item.Name || '';
@@ -70,10 +69,10 @@ export async function NavbarServer() {
     }
     // Si c'est un champ JSON
     else if (typeof nav === 'object' && nav !== null) {
-      if (Array.isArray(nav.links) || Array.isArray(nav.items)) {
-        const links = nav.links || nav.items;
+      if (Array.isArray((nav as any).links) || Array.isArray((nav as any).items)) {
+        const links = (nav as any).links || (nav as any).items;
         navigationLinks = links
-          .map((item: any) => ({
+          .map((item: StrapiNavigationItem) => ({
             href: item.href || item.url || '',
             label: item.label || item.name || '',
           }))

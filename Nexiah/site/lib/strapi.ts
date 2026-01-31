@@ -3,6 +3,16 @@
  * Gère la connexion à l'API Strapi avec gestion d'erreurs
  */
 
+import { 
+  StrapiQueryParams, 
+  StrapiFilters, 
+  StrapiMeta, 
+  StrapiResponse, 
+  StrapiCollectionResponse,
+  StrapiGlobalData,
+  StrapiMedia 
+} from './types/strapi';
+
 const STRAPI_API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
 
 /**
@@ -20,7 +30,7 @@ export function getStrapiURL(path: string): string {
  * Accepte aussi un objet cover complet pour extraire l'URL
  */
 export function formatImageUrl(
-  url: string | null | undefined | any,
+  url: string | null | undefined | StrapiMedia,
   fallback?: string
 ): string {
   // Si c'est un objet cover complet, extraire l'URL
@@ -67,8 +77,8 @@ export function formatImageUrl(
  */
 export async function fetchStrapi<T>(
   path: string,
-  params?: Record<string, any>
-): Promise<T> {
+  params?: StrapiQueryParams
+): Promise<T | null> {
   try {
     let url = getStrapiURL(path);
     
@@ -101,47 +111,24 @@ export async function fetchStrapi<T>(
       try {
         const errorText = await response.text();
         errorBody = errorText;
-        // Logs d'erreur uniquement en développement
-        if (process.env.NODE_ENV === 'development') {
-          console.error(`[Strapi] Error ${response.status}: ${response.statusText} for ${url}`);
-          // Limiter la taille du log d'erreur
-          if (errorBody.length > 500) {
-            console.error(`[Strapi] Error body (truncated):`, errorBody.substring(0, 500) + '...');
-          } else {
-            console.error(`[Strapi] Error body:`, errorBody);
-          }
-        }
       } catch (e) {
-        if (process.env.NODE_ENV === 'development') {
-          console.error(`[Strapi] Error ${response.status}: ${response.statusText} for ${url}`);
-        }
+        // Ignorer les erreurs de lecture du body
       }
       
       // Ne pas throw si c'est une 404, retourner null
       if (response.status === 404) {
-        return null as T;
+        return null;
       }
       
       // Pour les erreurs 400, retourner null au lieu de crasher
       if (response.status === 400) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn(`[Strapi] Bad Request - vérifiez le format des paramètres. URL: ${url}`);
-          if (errorBody.length > 500) {
-            console.warn(`[Strapi] Détails (truncated):`, errorBody.substring(0, 500) + '...');
-          } else {
-            console.warn(`[Strapi] Détails:`, errorBody);
-          }
-        }
-        return null as T;
+        return null;
       }
       
       // Pour les erreurs 403 (Forbidden), retourner null au lieu de crasher
       // Cela peut arriver si les permissions ne sont pas configurées dans Strapi
       if (response.status === 403) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn(`[Strapi] Forbidden (403) - Vérifiez les permissions dans Strapi Admin → Settings → Users & Permissions → Roles → Public. URL: ${url}`);
-        }
-        return null as T;
+        return null;
       }
       
       throw new Error(
@@ -153,8 +140,7 @@ export async function fetchStrapi<T>(
   } catch (error) {
     // Si c'est une erreur de connexion, retourner null au lieu de crasher
     if (error instanceof Error && error.message.includes('fetch')) {
-      console.warn('Strapi connection error:', error.message);
-      return null as T;
+      return null;
     }
     throw error;
   }
@@ -169,10 +155,10 @@ export async function getCollection<T>(
     populate?: string;
     limit?: number;
     sort?: string;
-    filters?: Record<string, any>;
+    filters?: StrapiFilters;
   }
-) {
-  const params: Record<string, any> = {};
+): Promise<StrapiCollectionResponse<T> | null> {
+  const params: StrapiQueryParams = {};
   
   // Populate - format Strapi v4
   if (options?.populate) {
@@ -217,7 +203,7 @@ export async function getCollection<T>(
     });
   }
 
-  return await fetchStrapi<{ data: T[]; meta?: any }>(`/${collection}`, params);
+  return await fetchStrapi<StrapiCollectionResponse<T>>(`/${collection}`, params);
 }
 
 /**
@@ -235,9 +221,9 @@ export async function getItem<T>(
  * Récupère le Single Type "Global" avec populate=*
  * Retourne les données avec les attributs extraits si nécessaire
  */
-export async function getGlobal() {
+export async function getGlobal(): Promise<StrapiGlobalData | null> {
   try {
-    const response = await fetchStrapi<{ data: any }>('/global', { populate: '*' });
+    const response = await fetchStrapi<StrapiResponse<StrapiGlobalData>>('/global', { populate: '*' });
     if (!response || !response.data) {
       return null;
     }
@@ -250,15 +236,12 @@ export async function getGlobal() {
         ...data.attributes,
         id: data.id,
         documentId: data.documentId,
-      };
+      } as StrapiGlobalData;
     }
     
     // Sinon, retourner les données directement
-    return data;
+    return data as StrapiGlobalData;
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[Strapi] Failed to fetch Global:', error);
-    }
     return null;
   }
 }
@@ -277,9 +260,6 @@ export async function getHomePage() {
     const populateParam = 'populate[content_sections][populate]=*';
     const fullUrl = `${url}?${populateParam}`;
     
-    if (process.env.NODE_ENV === 'development') {
-    }
-    
     const response = await fetch(fullUrl, {
       headers: {
         'Content-Type': 'application/json',
@@ -290,16 +270,10 @@ export async function getHomePage() {
     if (!response.ok) {
       // Gérer les erreurs comme dans fetchStrapi
       if (response.status === 404 || response.status === 403 || response.status === 400) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn(`[Strapi] HomePage not available: ${response.status}`);
-        }
         return null;
       }
       // Pour les erreurs 500, essayer avec un populate plus simple
       if (response.status === 500) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn(`[Strapi] HomePage error 500, trying with simpler populate`);
-        }
         // Essayer avec populate=deep (si supporté) ou populate=*
         const simpleUrl = `${url}?populate=deep`;
         try {
@@ -324,9 +298,7 @@ export async function getHomePage() {
             }
           }
         } catch (simpleError) {
-          if (process.env.NODE_ENV === 'development') {
-            console.warn('[Strapi] Simple populate also failed:', simpleError);
-          }
+          // Erreur silencieuse, retourner null
         }
       }
       throw new Error(`Strapi API error: ${response.status} ${response.statusText}`);
@@ -352,9 +324,6 @@ export async function getHomePage() {
     // Sinon, retourner les données directement
     return responseData;
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[Strapi] Failed to fetch HomePage:', error);
-    }
     return null;
   }
 }
@@ -368,10 +337,6 @@ export async function getAbout() {
     const populateParam = 'populate=*';
     const fullUrl = `${url}?${populateParam}`;
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Strapi] Fetching About: ${fullUrl}`);
-    }
-    
     const response = await fetch(fullUrl, {
       headers: {
         'Content-Type': 'application/json',
@@ -382,13 +347,6 @@ export async function getAbout() {
     if (!response.ok) {
       // Gérer les erreurs comme dans fetchStrapi
       if (response.status === 404 || response.status === 403 || response.status === 400) {
-        if (process.env.NODE_ENV === 'development') {
-          if (response.status === 403) {
-            console.warn(`[Strapi] About not available: 403 Forbidden. Please configure permissions in Strapi Admin → Settings → Users & Permissions → Roles → Public → About (find)`);
-          } else {
-            console.warn(`[Strapi] About not available: ${response.status}`);
-          }
-        }
         return null;
       }
       throw new Error(`Strapi API error: ${response.status} ${response.statusText}`);
@@ -414,9 +372,6 @@ export async function getAbout() {
     // Sinon, retourner les données directement
     return responseData;
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[Strapi] Failed to fetch About:', error);
-    }
     return null;
   }
 }
@@ -430,10 +385,6 @@ export async function getContact() {
     const populateParam = 'populate=*';
     const fullUrl = `${url}?${populateParam}`;
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Strapi] Fetching Contact: ${fullUrl}`);
-    }
-    
     const response = await fetch(fullUrl, {
       headers: {
         'Content-Type': 'application/json',
@@ -444,13 +395,6 @@ export async function getContact() {
     if (!response.ok) {
       // Gérer les erreurs comme dans fetchStrapi
       if (response.status === 404 || response.status === 403 || response.status === 400) {
-        if (process.env.NODE_ENV === 'development') {
-          if (response.status === 403) {
-            console.warn(`[Strapi] Contact not available: 403 Forbidden. Please configure permissions in Strapi Admin → Settings → Users & Permissions → Roles → Public → Contact (find)`);
-          } else {
-            console.warn(`[Strapi] Contact not available: ${response.status}`);
-          }
-        }
         return null;
       }
       throw new Error(`Strapi API error: ${response.status} ${response.statusText}`);
@@ -476,9 +420,6 @@ export async function getContact() {
     // Sinon, retourner les données directement
     return responseData;
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[Strapi] Failed to fetch Contact:', error);
-    }
     return null;
   }
 }

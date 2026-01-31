@@ -6,6 +6,7 @@ import { LucideIcon } from "lucide-react";
 
 // Interface pour un step depuis Strapi
 interface StepItem {
+  id?: number | string;
   title_step?: string;
   description_step?: string;
   icon_name?: string;
@@ -70,22 +71,14 @@ export function Process({
   const displayDescription = description_section || description || DEFAULT_DESCRIPTION;
   
   // Préparer la liste des étapes
-  // Debug en développement
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Process] Props received:', {
-      title_section,
-      description_section,
-      steps_list,
-      steps_list_length: steps_list?.length,
-      steps_list_type: typeof steps_list,
-      steps_list_isArray: Array.isArray(steps_list),
-      title,
-      description,
-      steps,
-      steps_length: steps?.length,
-    });
-  }
   
+  // Fonction pour générer un ID stable basé sur le contenu
+  const generateStableId = (title: string, description: string, index: number): string => {
+    const content = `${title}-${description}`;
+    // Utiliser un hash simple ou l'index en dernier recours
+    return content.length > 0 ? `step-${content.slice(0, 20).replace(/\s+/g, '-')}-${index}` : `step-${index}`;
+  };
+
   const preparedSteps = steps_list && Array.isArray(steps_list) && steps_list.length > 0
     ? steps_list.map((step, index) => {
         // Extraire les champs (gérer PascalCase et camelCase)
@@ -93,28 +86,26 @@ export function Process({
         const stepDescription = step.description_step || step.DescriptionStep || step.description || DEFAULT_STEPS[index % DEFAULT_STEPS.length]?.description || '';
         const iconName = step.icon_name || step.IconName || step.iconName;
         
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[Process] Prepared step ${index}:`, {
-            step,
-            stepTitle,
-            stepDescription,
-            iconName,
-          });
-        }
-        
         return {
+          id: step.id || generateStableId(stepTitle, stepDescription, index),
           title: stepTitle,
           description: stepDescription,
           icon_name: iconName,
         };
       })
     : steps && steps.length > 0
-    ? steps.map((step, index) => ({
-        title: step.title_step || step.TitleStep || step.title || DEFAULT_STEPS[index % DEFAULT_STEPS.length]?.title || `Étape ${index + 1}`,
-        description: step.description_step || step.DescriptionStep || step.description || DEFAULT_STEPS[index % DEFAULT_STEPS.length]?.description || '',
-        icon_name: step.icon_name || step.IconName || step.iconName,
-      }))
+    ? steps.map((step, index) => {
+        const stepTitle = step.title_step || step.TitleStep || step.title || DEFAULT_STEPS[index % DEFAULT_STEPS.length]?.title || `Étape ${index + 1}`;
+        const stepDescription = step.description_step || step.DescriptionStep || step.description || DEFAULT_STEPS[index % DEFAULT_STEPS.length]?.description || '';
+        return {
+          id: step.id || generateStableId(stepTitle, stepDescription, index),
+          title: stepTitle,
+          description: stepDescription,
+          icon_name: step.icon_name || step.IconName || step.iconName,
+        };
+      })
     : DEFAULT_STEPS.map((step, index) => ({
+        id: generateStableId(step.title, step.description, index),
         title: step.title,
         description: step.description,
         icon_name: undefined,
@@ -162,7 +153,7 @@ export function Process({
             
             return (
               <motion.div
-                key={`step-${index}`}
+                key={step.id}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -219,7 +210,7 @@ export function Process({
             
             return (
               <motion.div
-                key={`step-${index}`}
+                key={step.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

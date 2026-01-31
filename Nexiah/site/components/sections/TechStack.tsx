@@ -2,15 +2,17 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Box, Cpu, LucideIcon } from "lucide-react";
+import { Box, LucideIcon } from "lucide-react";
 import { formatImageUrl } from "@/lib/strapi";
+import { StrapiMedia } from "@/lib/types/strapi";
 
 // Interface pour un outil dans la liste
 interface ToolItem {
+  id?: number | string;
   tool_name?: string; // Nom de l'outil (priorité 1)
   name?: string; // Nom de l'outil (priorité 2, compatibilité)
   title?: string; // Nom de l'outil (priorité 3, compatibilité)
-  icon_pic?: any; // Media field from Strapi (image uploadée)
+  icon_pic?: StrapiMedia; // Media field from Strapi (image uploadée)
   icon_name?: string; // Slug SimpleIcons (ex: "react", "nodedotjs")
   // Support des variantes PascalCase
   ToolName?: string;
@@ -49,13 +51,14 @@ const DEFAULT_DESCRIPTION = "J'utilise le meilleur outil en fonction de votre pr
 
 // Interface pour un outil préparé avec le nom extrait
 interface PreparedTool {
+  id: string | number;
   name: string;
-  icon_pic?: any;
+  icon_pic?: StrapiMedia;
   icon_name?: string;
 }
 
 // Fonction pour extraire l'URL d'une image depuis le champ icon_pic (média Strapi)
-function getIconImageUrl(iconPic: any): string | null {
+function getIconImageUrl(iconPic: StrapiMedia | null | undefined): string | null {
   if (!iconPic) {
     return null;
   }
@@ -81,25 +84,16 @@ function getSmartIcon(tool: ToolItem): {
   // Priorité 1 : icon_pic (image custom uploadée)
   const customImageUrl = getIconImageUrl(tool.icon_pic);
   if (customImageUrl) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[TechStack] getSmartIcon: Using custom image from icon_pic');
-    }
     return { type: 'custom', imageUrl: customImageUrl };
   }
 
   // Priorité 2 : icon_name (slug SimpleIcons)
   if (tool.icon_name && tool.icon_name.trim()) {
     const simpleIconsUrl = `https://cdn.simpleicons.org/${tool.icon_name}`;
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[TechStack] getSmartIcon: Using SimpleIcons "${tool.icon_name}"`);
-    }
     return { type: 'simpleicons', imageUrl: simpleIconsUrl };
   }
 
-  // Fallback : icône Lucide (Box ou Cpu)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[TechStack] getSmartIcon: Using fallback icon (Box)');
-  }
+  // Fallback : icône Lucide (Box)
   return { type: 'fallback', iconComponent: Box };
 }
 
@@ -120,24 +114,18 @@ export function TechStack({
     ? tools_list.map((tool, index) => {
         // Gérer différents noms de champs (tool_name, name, title, etc.)
         const toolName = tool.tool_name || tool.name || tool.title || tool.ToolName || tool.Name || tool.Title || `Tool ${index + 1}`;
-        
-        // Debug en développement
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[TechStack] Tool ${index}:`, {
-            tool,
-            toolName,
-            icon_pic: tool.icon_pic,
-            icon_name: tool.icon_name,
-          });
-        }
+        // Générer un ID stable
+        const stableId = tool.id || `tool-${toolName.replace(/\s+/g, '-').slice(0, 30)}-${index}`;
         
         return {
+          id: stableId,
           name: toolName,
           icon_pic: tool.icon_pic,
           icon_name: tool.icon_name || tool.iconName || tool.IconName,
         };
       })
-    : DEFAULT_TOOLS.map(tool => ({
+    : DEFAULT_TOOLS.map((tool, index) => ({
+        id: `default-tool-${tool.name.replace(/\s+/g, '-')}-${index}`,
         name: tool.name,
         icon_name: tool.icon_name,
       }));
@@ -189,10 +177,12 @@ export function TechStack({
             {allTools.map((tool, index) => {
               const smartIcon = getSmartIcon(tool);
               const toolName = tool.name || 'Tool';
+              // Pour la duplication, ajouter un suffixe unique
+              const uniqueKey = `${tool.id}-${Math.floor(index / tools.length)}`;
 
               return (
                 <div
-                  key={`${toolName}-${index}`}
+                  key={uniqueKey}
                   className="flex-shrink-0 flex flex-col items-center justify-center group w-24 mx-2"
                 >
                   {/* Rendu de l'icône selon le type */}

@@ -23,7 +23,7 @@ export function Footer() {
               Mentions légales
             </Link>
             <Link
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/company/nexiah/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-slate-400 hover:text-slate-50 transition-colors"
@@ -34,7 +34,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-sm text-slate-400">
-            © 2024 Nexiah. Tous droits réservés.
+            © 2026 Nexiah. Tous droits réservés.
           </p>
         </div>
       </div>

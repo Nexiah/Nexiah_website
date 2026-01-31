@@ -3,17 +3,18 @@ import { Hero } from "@/components/sections/Hero";
 import { Services } from "@/components/sections/Services";
 import { Process } from "@/components/sections/Process";
 import { TechStack } from "@/components/sections/TechStack";
-import { FeaturedWork } from "@/components/sections/FeaturedWork";
+import { FeaturedWorkServer } from "@/components/sections/FeaturedWorkServer";
 import { Trust } from "@/components/sections/Trust";
 import { Arguments } from "@/components/sections/Arguments";
 import { Footer } from "@/components/layout/Footer";
 import { getHomePage } from "@/lib/strapi";
 
+import { StrapiContentSection } from "@/lib/types/strapi";
+
 // Interface pour les sections de la Dynamic Zone
-interface ContentSection {
+interface ContentSection extends StrapiContentSection {
   __component: string;
   id?: number;
-  [key: string]: any;
 }
 
 // Fonction pour rendre une section selon son type
@@ -28,9 +29,12 @@ function renderSection(section: ContentSection, index: number) {
       const heroCta = section.cta_text || section.ctaText || section.CtaText || section.CTA_text || '';
       
       
+      // Générer un ID stable pour la key
+      const heroKey = section.id || `hero-${heroTitle.slice(0, 20).replace(/\s+/g, '-')}-${index}`;
+      
       return (
         <Hero
-          key={section.id || `hero-${index}`}
+          key={heroKey}
           title={heroTitle}
           subtitle={heroSubtitle}
           cta_text={heroCta}
@@ -68,62 +72,12 @@ function renderSection(section: ContentSection, index: number) {
         expertisesList = [];
       }
       
-      // Debug en développement - log complet de la section
-      if (process.env.NODE_ENV === 'development') {
-        // Créer un objet avec toutes les clés et leurs valeurs pour debug
-        const sectionDebug: Record<string, any> = {};
-        Object.keys(section).forEach(key => {
-          const value = section[key];
-          sectionDebug[key] = {
-            type: typeof value,
-            isArray: Array.isArray(value),
-            length: Array.isArray(value) ? value.length : undefined,
-            value: Array.isArray(value) && value.length > 0 
-              ? `[Array with ${value.length} items]` 
-              : value,
-          };
-        });
-        
-        console.log('[HomePage] Expertise section data (FULL):', { 
-          section,
-          sectionKeys: Object.keys(section),
-          sectionDebug,
-          expertiseTitle, 
-          expertiseDescription,
-          expertisesList,
-          expertisesListLength: expertisesList.length,
-          // Tester tous les champs possibles
-          expertise_list: section.expertise_list,
-          ExpertiseList: section.ExpertiseList,
-          expertises_list: section.expertises_list,
-          ExpertisesList: section.ExpertisesList,
-          expertises: section.expertises,
-          Expertises: section.Expertises,
-        });
-        // Log détaillé de chaque expertise pour voir les champs icon_name
-        if (expertisesList.length > 0) {
-          expertisesList.forEach((exp, idx) => {
-            console.log(`[HomePage] Expertise ${idx}:`, {
-              title_expertise: exp.title_expertise,
-              TitleExpertise: exp.TitleExpertise,
-              description_expertise: exp.description_expertise,
-              DescriptionExpertise: exp.DescriptionExpertise,
-              icon_name: exp.icon_name,
-              IconName: exp.IconName,
-              icon_pic: exp.icon_pic,
-              IconPic: exp.IconPic,
-              fullItem: exp,
-              allKeys: Object.keys(exp)
-            });
-          });
-        } else {
-          console.warn('[HomePage] Expertise section: expertisesList is empty!');
-        }
-      }
+      // Générer un ID stable pour la key
+      const expertiseKey = section.id || `expertise-${expertiseTitle.slice(0, 20).replace(/\s+/g, '-')}-${index}`;
       
       return (
         <Services
-          key={section.id || `expertise-${index}`}
+          key={expertiseKey}
           title_section={expertiseTitle}
           description_section={expertiseDescription}
           expertises_list={expertisesList}
@@ -166,89 +120,17 @@ function renderSection(section: ContentSection, index: number) {
         }
       }
       
-      // Essayer aussi de chercher dans tous les champs qui contiennent "step" ou "list"
-      if ((!Array.isArray(stepsList) || stepsList.length === 0) && process.env.NODE_ENV === 'development') {
-        const possibleFields = Object.keys(section).filter(key => 
-          key.toLowerCase().includes('step') || 
-          key.toLowerCase().includes('list') ||
-          key.toLowerCase().includes('item')
-        );
-        if (possibleFields.length > 0) {
-          console.log('[HomePage] Step section: Found possible fields:', possibleFields);
-          possibleFields.forEach(field => {
-            const value = section[field];
-            console.log(`[HomePage] Step section: Field "${field}":`, {
-              type: typeof value,
-              isArray: Array.isArray(value),
-              length: Array.isArray(value) ? value.length : undefined,
-              value: Array.isArray(value) && value.length > 0 ? value[0] : value,
-            });
-          });
-        }
-      }
-      
       // S'assurer que c'est un tableau
       if (!Array.isArray(stepsList)) {
         stepsList = [];
       }
       
-      // Debug en développement - log complet de la section pour voir tous les champs disponibles
-      if (process.env.NODE_ENV === 'development') {
-        // Créer un objet avec toutes les clés et leurs valeurs pour debug
-        const sectionDebug: Record<string, any> = {};
-        Object.keys(section).forEach(key => {
-          const value = section[key];
-          sectionDebug[key] = {
-            type: typeof value,
-            isArray: Array.isArray(value),
-            length: Array.isArray(value) ? value.length : undefined,
-            value: Array.isArray(value) && value.length > 0 
-              ? `[Array with ${value.length} items]` 
-              : value,
-          };
-        });
-        
-        console.log('[HomePage] Step section data (FULL):', { 
-          section,
-          sectionKeys: Object.keys(section),
-          sectionDebug,
-          stepTitle, 
-          stepDescription,
-          stepsList,
-          stepsListLength: stepsList.length,
-          componentType,
-          // Tester tous les champs possibles
-          steps_list: section.steps_list,
-          StepsList: section.StepsList,
-          steps: section.steps,
-          Steps: section.Steps,
-          step: section.step,
-        });
-        // Log détaillé de chaque step pour voir les champs disponibles
-        if (stepsList.length > 0) {
-          stepsList.forEach((step, idx) => {
-            console.log(`[HomePage] Step ${idx}:`, {
-              step,
-              stepKeys: Object.keys(step),
-              title_step: step.title_step,
-              TitleStep: step.TitleStep,
-              description_step: step.description_step,
-              DescriptionStep: step.DescriptionStep,
-              icon_name: step.icon_name,
-              IconName: step.IconName,
-              // Anciens noms
-              title: step.title,
-              description: step.description,
-            });
-          });
-        } else {
-          console.warn('[HomePage] Step section: stepsList is empty!');
-        }
-      }
+      // Générer un ID stable pour la key
+      const stepKey = section.id || `step-${stepTitle.slice(0, 20).replace(/\s+/g, '-')}-${index}`;
       
       return (
         <Process
-          key={section.id || `step-${index}`}
+          key={stepKey}
           title_section={stepTitle}
           description_section={stepDescription}
           steps_list={stepsList}
@@ -295,35 +177,6 @@ function renderSection(section: ContentSection, index: number) {
         }
       }
       
-      // Debug en développement - voir tous les champs disponibles
-      if (process.env.NODE_ENV === 'development') {
-        const sectionDebug: Record<string, any> = {};
-        Object.keys(section).forEach(key => {
-          const value = section[key];
-          sectionDebug[key] = {
-            type: typeof value,
-            isArray: Array.isArray(value),
-            value: typeof value === 'string' ? value : (Array.isArray(value) ? `[Array with ${value.length} items]` : value),
-          };
-        });
-        console.log('[HomePage] Argument section - All fields:', {
-          sectionKeys: Object.keys(section),
-          sectionDebug,
-          argumentTitle,
-          argumentDescription,
-          // Tester tous les champs possibles
-          title_section: section.title_section,
-          TitleSection: section.TitleSection,
-          description_section: section.description_section,
-          description_section_type: typeof section.description_section,
-          description_section_isNull: section.description_section === null,
-          description_section_value: section.description_section,
-          DescriptionSection: section.DescriptionSection,
-          title: section.title,
-          description: section.description,
-        });
-      }
-      
       // Récupérer arguments_list (tableau répétable) - essayer plusieurs variantes
       let argumentsList = 
         section.arguments_list || 
@@ -356,40 +209,12 @@ function renderSection(section: ContentSection, index: number) {
         argumentsList = [];
       }
       
-      // Debug en développement
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[HomePage] Argument section data:', { 
-          section, 
-          argumentTitle, 
-          argumentDescription,
-          argumentsList,
-          argumentsListLength: argumentsList.length,
-          componentType
-        });
-        // Log détaillé de chaque argument pour voir les champs disponibles
-        if (argumentsList.length > 0) {
-          argumentsList.forEach((arg, idx) => {
-            console.log(`[HomePage] Argument ${idx}:`, {
-              arg,
-              title: arg.title,
-              Title: arg.Title,
-              description: arg.description,
-              Description: arg.Description,
-              icon_name: arg.icon_name,
-              IconName: arg.IconName,
-              icon: arg.icon,
-              Icon: arg.Icon,
-              allKeys: Object.keys(arg)
-            });
-          });
-        } else {
-          console.warn('[HomePage] Argument section: argumentsList is empty!');
-        }
-      }
+      // Générer un ID stable pour la key
+      const argumentKey = section.id || `argument-${argumentTitle.slice(0, 20).replace(/\s+/g, '-')}-${index}`;
       
       return (
         <Arguments
-          key={section.id || `argument-${index}`}
+          key={argumentKey}
           title_section={argumentTitle}
           description_section={argumentDescription}
           arguments_list={argumentsList}
@@ -415,33 +240,12 @@ function renderSection(section: ContentSection, index: number) {
         toolsList = [];
       }
       
-      // Debug en développement
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[HomePage] Tool section data:', { 
-          section, 
-          toolTitle, 
-          toolDescription,
-          toolsList,
-          toolsListLength: toolsList.length,
-          componentType
-        });
-        // Log détaillé de chaque tool pour voir les champs disponibles
-        toolsList.forEach((tool, idx) => {
-          console.log(`[HomePage] Tool ${idx}:`, {
-            tool,
-            tool_name: tool.tool_name,
-            name: tool.name,
-            title: tool.title,
-            icon_name: tool.icon_name,
-            icon_pic: tool.icon_pic,
-            allKeys: Object.keys(tool)
-          });
-        });
-      }
+      // Générer un ID stable pour la key
+      const toolKey = section.id || `tool-${toolTitle.slice(0, 20).replace(/\s+/g, '-')}-${index}`;
       
       return (
         <TechStack
-          key={section.id || `tool-${index}`}
+          key={toolKey}
           title_section={toolTitle}
           description_section={toolDescription}
           tools_list={toolsList}
@@ -453,9 +257,6 @@ function renderSection(section: ContentSection, index: number) {
 
     default:
       // Si le composant n'est pas reconnu, ne rien afficher
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`[HomePage] Unknown component type: ${componentType}`);
-      }
       return null;
   }
 }
@@ -467,9 +268,7 @@ export default async function Home() {
   try {
     homepageData = await getHomePage();
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[HomePage] Failed to fetch homepage data:', error);
-    }
+    // Erreur silencieuse, utiliser fallback
   }
 
   // Extraire les sections de la Dynamic Zone
@@ -490,7 +289,7 @@ export default async function Home() {
             <Services />
             <Process />
             <TechStack />
-            <FeaturedWork />
+            <FeaturedWorkServer />
             <Trust />
           </>
         ) : (
@@ -498,7 +297,7 @@ export default async function Home() {
           <>
             {contentSections.map((section, index) => renderSection(section, index))}
             {/* FeaturedWork est toujours affiché car il n'est pas dans la Dynamic Zone */}
-            <FeaturedWork />
+            <FeaturedWorkServer />
           </>
         )}
       </main>

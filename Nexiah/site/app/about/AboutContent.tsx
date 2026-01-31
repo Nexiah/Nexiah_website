@@ -8,14 +8,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatImageUrl } from "@/lib/strapi";
 import { Arguments } from "@/components/sections/Arguments";
+import { StrapiMedia, StrapiBlocksContent } from "@/lib/types/strapi";
+import React from 'react';
 
 // Interface pour les données About depuis Strapi
 interface AboutData {
   title?: string;
   subtitle?: string;
-  profile_picture?: any;
-  bio_content?: any; // Blocks JSON
+  profile_picture?: StrapiMedia;
+  bio_content?: StrapiBlocksContent;
   values?: Array<{
+    id?: number | string;
     title?: string;
     description?: string;
     icon_name?: string;
@@ -27,7 +30,7 @@ interface AboutContentProps {
 }
 
 // Fonction pour extraire l'URL de l'image de profil
-function getProfilePictureUrl(profilePicture: any): string | null {
+function getProfilePictureUrl(profilePicture: StrapiMedia | null | undefined): string | null {
   if (!profilePicture) {
     return null;
   }
@@ -47,7 +50,7 @@ function getProfilePictureUrl(profilePicture: any): string | null {
 // Composant pour rendre le bio_content (Blocks)
 // Note: @strapi/blocks-react-renderer ne peut pas être utilisé côté client
 // On utilise un parser manuel pour les blocs Strapi
-function BioContentRenderer({ content }: { content: any }) {
+function BioContentRenderer({ content }: { content: StrapiBlocksContent }) {
   if (!content) {
     return null;
   }
@@ -65,18 +68,22 @@ function BioContentRenderer({ content }: { content: any }) {
   if (Array.isArray(content)) {
     return (
       <div className="prose dark:prose-invert max-w-none space-y-4">
-        {content.map((block: any, index: number) => {
+        {content.map((block, index: number) => {
+          // Générer un ID stable pour chaque bloc
+          const blockId = `bio-block-${block.type}-${index}`;
+          
           // Paragraphe
           if (block.type === 'paragraph' && block.children) {
             return (
-              <p key={index} className="text-base text-muted-foreground leading-relaxed">
-                {block.children.map((child: any, childIndex: number) => {
+              <p key={blockId} className="text-base text-muted-foreground leading-relaxed">
+                {block.children.map((child, childIndex: number) => {
+                  const childId = `${blockId}-child-${childIndex}`;
                   if (child.type === 'text') {
-                    return <span key={childIndex}>{child.text}</span>;
+                    return <span key={childId}>{child.text}</span>;
                   }
                   // Gérer le texte en gras
                   if (child.type === 'text' && child.bold) {
-                    return <strong key={childIndex}>{child.text}</strong>;
+                    return <strong key={childId}>{child.text}</strong>;
                   }
                   return null;
                 })}
@@ -86,10 +93,10 @@ function BioContentRenderer({ content }: { content: any }) {
           
           // Titre
           if (block.type === 'heading' && block.level) {
-            const HeadingTag = `h${block.level}` as keyof JSX.IntrinsicElements;
-            const text = block.children?.map((c: any) => c.text).join('') || '';
+            const HeadingTag = `h${block.level}` as keyof React.JSX.IntrinsicElements;
+            const text = block.children?.map((c) => c.text).join('') || '';
             return (
-              <HeadingTag key={index} className="font-semibold text-foreground mt-6 mb-4">
+              <HeadingTag key={blockId} className="font-semibold text-foreground mt-6 mb-4">
                 {text}
               </HeadingTag>
             );
@@ -99,10 +106,10 @@ function BioContentRenderer({ content }: { content: any }) {
           if (block.type === 'list' && block.children) {
             const ListTag = block.format === 'ordered' ? 'ol' : 'ul';
             return (
-              <ListTag key={index} className="list-disc list-inside space-y-2 text-base text-muted-foreground">
-                {block.children.map((item: any, itemIndex: number) => (
-                  <li key={itemIndex}>
-                    {item.children?.map((child: any, childIndex: number) => 
+              <ListTag key={blockId} className="list-disc list-inside space-y-2 text-base text-muted-foreground">
+                {block.children.map((item, itemIndex: number) => (
+                  <li key={`${blockId}-item-${itemIndex}`}>
+                    {item.children?.map((child, childIndex: number) => 
                       child.type === 'text' ? child.text : ''
                     ).join('')}
                   </li>

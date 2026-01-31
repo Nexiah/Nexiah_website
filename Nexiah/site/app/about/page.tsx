@@ -4,8 +4,13 @@ import { AboutContent } from "./AboutContent";
 import { getAbout } from "@/lib/strapi";
 
 export default async function AboutPage() {
-  // Récupérer les données depuis Strapi
-  const aboutData = await getAbout();
+  // Récupérer les données depuis Strapi avec gestion d'erreur
+  let aboutData = null;
+  try {
+    aboutData = await getAbout();
+  } catch (error) {
+    // Erreur silencieuse, utiliser fallback (null)
+  }
   
   return (
     <div className="min-h-screen bg-white">
