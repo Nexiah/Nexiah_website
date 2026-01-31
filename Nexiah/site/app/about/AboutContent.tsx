@@ -79,10 +79,10 @@ function BioContentRenderer({ content }: { content: StrapiBlocksContent }) {
                 {block.children.map((child, childIndex: number) => {
                   // Juste avant ton mapping, force le type du child
                   const childAny = child as any;
-                  if (childAny.type === 'text' && childAny.bold) {
+                  if ((child as any).type === 'text' && (child as any).bold) {
                     // On utilise 'index' car c'est souvent le nom standard dans un .map()
                     // Si ton map utilise un autre nom (comme 'i'), remplace 'index' par ce nom.
-                    return <strong key={index}>{childAny.text}</strong>;
+                    return <strong key={childIndex}>{child.text}</strong>;
                   }
                   // Gérer le texte en gras
                   if (child.type === 'text' && child.bold) {
