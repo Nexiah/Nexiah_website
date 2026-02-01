@@ -39,9 +39,16 @@ export default [
     name: 'strapi::cors',
     config: {
       headers: '*',
-      origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+      // Ajoute tes domaines de production ici 👇
+      origin: [
+        'http://localhost:3000', 
+        'http://127.0.0.1:3000', 
+        'https://nexiah.fr', 
+        'https://www.nexiah.fr'
+      ],
     },
   },
+
   'strapi::poweredBy',
   'strapi::query',
   'strapi::body',
