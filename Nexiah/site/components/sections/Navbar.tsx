@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,7 @@ export function Navbar({
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   // Éviter les problèmes d'hydratation avec Radix UI
   useEffect(() => {
@@ -63,10 +64,10 @@ export function Navbar({
         }
         return href;
       }
-      // Sinon, on redirige vers la homepage avec l'ancre
+      // Sinon, navigation Next.js vers la homepage avec l'ancre
       if (e) {
         e.preventDefault();
-        window.location.href = `/${href}`;
+        router.push(`/${href}`);
       }
       return `/${href}`;
     }
@@ -75,43 +76,32 @@ export function Navbar({
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-auto items-center justify-between py-6 md:py-8">
+        <div className="flex h-auto items-center justify-between py-3 md:py-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3">
+          <Link href="/" className="flex items-center space-x-2">
             {logoUrl ? (
-              <div className="relative h-14 md:h-24 w-auto flex-shrink-0">
+              <div className="relative h-9 md:h-11 w-auto flex-shrink-0">
                 {(() => {
                   const formattedLogoUrl = formatImageUrl(logoUrl);
-                  const isLocalhost = formattedLogoUrl.includes('localhost');
-                  
-                  // Utiliser <img> pour localhost, Next/Image pour les autres
-                  if (isLocalhost) {
-                    return (
-                      <img
-                        src={formattedLogoUrl}
-                        alt={siteName}
-                        className="h-14 md:h-24 w-auto object-contain"
-                      />
-                    );
-                  }
+                  const isLocalhost = formattedLogoUrl.includes("localhost");
                   return (
                     <Image
                       src={formattedLogoUrl}
                       alt={siteName}
                       width={300}
                       height={150}
-                      className="h-14 md:h-24 w-auto object-contain"
-                      unoptimized
+                      className="h-9 md:h-11 w-auto object-contain"
+                      unoptimized={isLocalhost}
                     />
                   );
                 })()}
               </div>
             ) : (
-              <div className="flex h-14 md:h-24 w-14 md:w-24 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Zap className="h-8 md:h-12 w-8 md:w-12" />
+              <div className="flex h-9 md:h-11 w-9 md:w-11 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <Zap className="h-5 md:h-6 w-5 md:w-6" />
               </div>
             )}
-            <span className="text-xl md:text-2xl font-semibold text-foreground">{siteName}</span>
+            <span className="text-lg md:text-xl font-semibold text-foreground">{siteName}</span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -159,39 +149,28 @@ export function Navbar({
                     onClick={() => setOpen(false)}
                   >
                     {logoUrl ? (
-                      <div className="relative h-14 w-auto flex-shrink-0">
+                      <div className="relative h-10 w-auto flex-shrink-0">
                         {(() => {
                           const formattedLogoUrl = formatImageUrl(logoUrl);
-                          const isLocalhost = formattedLogoUrl.includes('localhost');
-                          
-                          // Utiliser <img> pour localhost, Next/Image pour les autres
-                          if (isLocalhost) {
-                            return (
-                              <img
-                                src={formattedLogoUrl}
-                                alt={siteName}
-                                className="h-14 w-auto object-contain"
-                              />
-                            );
-                          }
+                          const isLocalhost = formattedLogoUrl.includes("localhost");
                           return (
                             <Image
                               src={formattedLogoUrl}
                               alt={siteName}
                               width={300}
                               height={150}
-                              className="h-14 w-auto object-contain"
-                              unoptimized
+                              className="h-10 w-auto object-contain"
+                              unoptimized={isLocalhost}
                             />
                           );
                         })()}
                       </div>
                     ) : (
-                      <div className="flex h-14 w-14 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                        <Zap className="h-8 w-8" />
+                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                        <Zap className="h-5 w-5" />
                       </div>
                     )}
-                    <span className="text-xl font-semibold text-foreground">{siteName}</span>
+                    <span className="text-lg font-semibold text-foreground">{siteName}</span>
                   </Link>
                 </div>
 

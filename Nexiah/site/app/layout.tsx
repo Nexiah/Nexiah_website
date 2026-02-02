@@ -64,8 +64,12 @@ export async function generateMetadata(): Promise<Metadata> {
     description: defaultDescription,
   };
   
-  // Ajouter l'icône si disponible
-  if (faviconUrl) {
+  // Ajouter l'icône uniquement si l'URL est valide (évite {{link.icon}} ou data: invalide)
+  const hasValidFavicon =
+    faviconUrl &&
+    (faviconUrl.startsWith("http") ||
+      (faviconUrl.startsWith("data:image") && faviconUrl.includes("base64,")));
+  if (hasValidFavicon && faviconUrl) {
     metadata.icons = {
       icon: faviconUrl,
       shortcut: faviconUrl,

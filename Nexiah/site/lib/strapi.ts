@@ -25,9 +25,29 @@ export function getStrapiURL(path: string): string {
 }
 
 /**
+ * Vérifie qu'une URL est utilisable pour une image (pas un placeholder, pas une data URL invalide).
+ */
+function isValidImageUrl(url: string): boolean {
+  const trimmed = url.trim();
+  // Rejeter les placeholders type {{link.icon}} ou {{...}}
+  if (trimmed.includes('{{') && trimmed.includes('}}')) {
+    return false;
+  }
+  // Rejeter les data URLs invalides (tronquées ou sans payload)
+  if (trimmed.startsWith('data:')) {
+    const base64Match = /^data:image\/[^;]+;base64,(.+)$/.exec(trimmed);
+    if (!base64Match || !base64Match[1] || base64Match[1].length < 10) {
+      return false;
+    }
+  }
+  return trimmed.length > 0;
+}
+
+/**
  * Formate une URL d'image Strapi
  * Gère les cas où l'image est absente ou profondément imbriquée
  * Accepte aussi un objet cover complet pour extraire l'URL
+ * Rejette les URLs invalides (placeholders {{...}}, data URLs tronquées).
  */
 export function formatImageUrl(
   url: string | null | undefined | StrapiMedia,
@@ -58,7 +78,12 @@ export function formatImageUrl(
     return fallback || '';
   }
 
-  // Si l'URL est déjà complète, la retourner telle quelle
+  // Rejeter les URLs invalides (template Strapi, data URL tronquée)
+  if (!isValidImageUrl(url)) {
+    return fallback || '';
+  }
+
+  // URL déjà complète (Cloudinary, CDN, etc.) : la retourner telle quelle
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
