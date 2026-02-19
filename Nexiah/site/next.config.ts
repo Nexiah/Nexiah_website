@@ -39,7 +39,13 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
-        pathname: '/**', // 👈 Ajout du wildcard pour autoriser tout le stockage Cloudinary
+        pathname: '/**',
+      },
+      // SimpleIcons CDN (TechStack)
+      {
+        protocol: 'https',
+        hostname: 'cdn.simpleicons.org',
+        pathname: '/**',
       },
     ],
     // Désactiver l'optimisation pour les images locales en développement

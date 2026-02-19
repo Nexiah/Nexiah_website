@@ -78,7 +78,7 @@ export function Navbar({
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-auto items-center justify-between py-3 md:py-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center" aria-label={siteName}>
             {logoUrl ? (
               <div className="relative h-9 md:h-11 w-auto flex-shrink-0">
                 {(() => {
@@ -101,7 +101,6 @@ export function Navbar({
                 <Zap className="h-5 md:h-6 w-5 md:w-6" />
               </div>
             )}
-            <span className="text-lg md:text-xl font-semibold text-foreground">{siteName}</span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -145,8 +144,9 @@ export function Navbar({
                 <div className="mb-8">
                   <Link
                     href="/"
-                    className="flex items-center space-x-3"
+                    className="flex items-center"
                     onClick={() => setOpen(false)}
+                    aria-label={siteName}
                   >
                     {logoUrl ? (
                       <div className="relative h-10 w-auto flex-shrink-0">
@@ -170,7 +170,6 @@ export function Navbar({
                         <Zap className="h-5 w-5" />
                       </div>
                     )}
-                    <span className="text-lg font-semibold text-foreground">{siteName}</span>
                   </Link>
                 </div>
 

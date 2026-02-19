@@ -72,20 +72,6 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
                   );
                 }
 
-                // Pour localhost, utiliser img standard directement (évite l'hydratation)
-                if (isLocalhost) {
-                  return (
-                    <div className="relative aspect-video w-full overflow-hidden bg-muted">
-                      <img
-                        src={formattedUrl}
-                        alt={imageAlt || project.title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    </div>
-                  );
-                }
-
-                // Pour les autres URLs, utiliser next/image
                 return (
                   <div className="relative aspect-video w-full overflow-hidden bg-muted">
                     <Image
@@ -93,6 +79,8 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
                       alt={imageAlt || project.title}
                       fill
                       className="object-cover"
+                      unoptimized={isLocalhost}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   </div>
                 );

@@ -1,145 +1,94 @@
-# 🔍 RAPPORT D'AUDIT TECHNIQUE - ZERO TOLERANCE
+# Rapport d'audit technique – Zero Tolerance
 
-**Date :** 2026-01-22  
-**Scope :** `/components` et `/app` uniquement  
-**Stack :** Next.js 16 (App Router) + React + TypeScript + Tailwind CSS
-
----
-
-## 📊 RÉSUMÉ EXÉCUTIF
-
-| Catégorie | 🔴 Critique | 🟠 Important | 🟡 Mineur | ✅ Conforme |
-|-----------|------------|--------------|-----------|-------------|
-| **Performance & Rendu** | 8 | 3 | 2 | - |
-| **Architecture Next.js** | 0 | 1 | 0 | - |
-| **Qualité Code & TypeScript** | 0 | 15 | 5 | - |
-| **CSS & UI (Tailwind)** | 0 | 2 | 0 | - |
-| **TOTAL** | **8** | **21** | **7** | - |
+**Date :** 2026-02-02  
+**Référence :** [AUDIT_PROTOCOL.md](/Users/jonasmateus/Projects/AUDIT_PROTOCOL.md)  
+**Périmètre :** Frontend `site/` (Next.js 16, App Router), Backend `cms/` (Strapi v5)
 
 ---
 
-## 🔴 PROBLÈMES CRITIQUES
+## Résumé exécutif
 
-### 1. Performance & Rendu (React Core)
-
-| Fichier | Ligne | Sévérité | Problème Détecté | Suggestion Technique |
-| :--- | :---: | :---: | :--- | :--- |
-| `components/sections/Process.tsx` | 165, 222 | 🔴 Critique | `key={step-${index}}` - Utilise l'index au lieu d'un ID stable | Utiliser `step.id` ou `step.title_step` comme key unique |
-| `components/sections/Arguments.tsx` | 217 | 🔴 Critique | `key={argument-${index}-${argumentTitle}}` - Index dans la key | Utiliser `argument.id` ou combinaison stable `argument.title + argument.icon_name` |
-| `components/sections/Services.tsx` | 146 | 🔴 Critique | `key={expertise-${index}-${title}}` - Index dans la key | Utiliser `expertise.id` ou `expertise.title_expertise` comme key unique |
-| `components/sections/TechStack.tsx` | 195 | 🔴 Critique | `key={${toolName}-${index}}` - Index dans la key | Utiliser `tool.id` ou `tool.tool_name` comme key unique |
-| `components/ui/project-grid.tsx` | 31 | 🔴 Critique | `key={project.title}` - Pas d'ID Strapi, risque de collision | Utiliser `project.slug` ou `project.id` comme key |
-| `app/page.tsx` | 33, 126, 251, 392, 444 | 🔴 Critique | `key={section.id || \`hero-${index}\`}` - Fallback sur index | S'assurer que `section.id` existe toujours, sinon générer un ID stable |
-| `components/sections/Hero.tsx` | 51, 66, 77, 82 | 🔴 Critique | `key={index}` dans parseTitle - Index utilisé comme key | Utiliser un hash du contenu ou un ID généré stable |
-| `app/about/AboutContent.tsx` | 68, 73, 92, 102 | 🔴 Critique | `key={index}` dans BioContentRenderer - Index utilisé | Générer un ID stable basé sur le contenu du bloc |
+| Catégorie | Critique | Important | Mineur |
+|-----------|----------|-----------|--------|
+| Performance & Rendu | 2 | 3 | 2 |
+| Architecture Next.js | 0 | 0 | 1 |
+| Qualité Code & TypeScript | 0 | 12 | 0 |
+| CSS & UI (Tailwind) | 0 | 1 | 0 |
+| Backend Strapi | 0 | 0 | 1 |
+| Intégration | 0 | 0 | 0 |
+| **Total** | **2** | **16** | **4** |
 
 ---
 
-## 🟠 PROBLÈMES IMPORTANTS
+## Problèmes critiques
 
-### 2. Qualité du Code & TypeScript
-
-| Fichier | Ligne | Sévérité | Problème Détecté | Suggestion Technique |
-| :--- | :---: | :---: | :--- | :--- |
-| `components/sections/Services.tsx` | 15, 31 | 🟠 Important | `icon_pic?: any` - Type `any` explicite | Créer interface `StrapiMedia` avec structure typée |
-| `components/sections/TechStack.tsx` | 13, 53, 58 | 🟠 Important | `icon_pic?: any` - Type `any` explicite | Créer interface `StrapiMedia` réutilisable |
-| `components/sections/NavbarServer.tsx` | 14, 63, 76 | 🟠 Important | `logo?: any`, `item: any` - Types `any` | Typage strict avec interfaces Strapi |
-| `components/sections/FeaturedWork.tsx` | 67 | 🟠 Important | `item: any` dans map - Type `any` | Utiliser interface `StrapiProject` typée |
-| `app/page.tsx` | 16 | 🟠 Important | `[key: string]: any` - Index signature avec any | Typage strict par section type |
-| `app/about/AboutContent.tsx` | 16, 17, 30, 50, 68, 73, 90, 103, 105 | 🟠 Important | `any` utilisé partout pour bio_content et blocks | Créer types Strapi Blocks JSON stricts |
-| `app/work/[slug]/page.tsx` | 19, 72, 89, 93, 107, 132, 134, 183, 197, 274, 306 | 🟠 Important | `any` utilisé massivement - 12 occurrences | Typage complet avec interfaces Strapi |
-| `components/sections/Arguments.tsx` | 36-143 | 🟠 Important | Fonction `getLucideIcon` dupliquée - Code mort | Supprimer, utiliser `lib/icons.ts` |
-| `components/sections/Arguments.tsx` | 4 | 🟠 Important | Import `* as LucideIcons` inutilisé | Supprimer l'import |
-| `components/sections/Process.tsx` | 75, 97 | 🟠 Important | `console.log` en développement | Supprimer ou utiliser un logger conditionnel |
-| `components/sections/Arguments.tsx` | 48, 74, 97, 125, 133, 139, 168 | 🟠 Important | 7 `console.log/warn` en développement | Supprimer tous les logs de debug |
-| `components/sections/Services.tsx` | 58, 67, 74, 90, 107 | 🟠 Important | 5 `console.log` en développement | Supprimer tous les logs de debug |
-| `components/sections/TechStack.tsx` | 85, 94, 101, 126 | 🟠 Important | 4 `console.log` en développement | Supprimer tous les logs de debug |
-| `components/sections/Hero.tsx` | 22, 32, 91-93 | 🟠 Important | 5 `console.log` en développement | Supprimer tous les logs de debug |
-| `app/page.tsx` | 87, 106, 120, 177, 180, 211, 230, 245, 309, 361, 372, 386, 420, 430, 457 | 🟠 Important | 15 `console.log/warn` en développement | Supprimer tous les logs de debug |
-| `app/work/page.tsx` | 61, 70, 74, 83, 91, 111, 142 | 🟠 Important | 7 `console.log` en développement | Supprimer tous les logs de debug |
-| `app/work/[slug]/page.tsx` | 188, 222, 235, 247, 298, 315 | 🟠 Important | 6 `console.log` en développement | Supprimer tous les logs de debug |
-| `components/forms/contact-form.tsx` | 79, 98 | 🟠 Important | 2 `console.log` en développement | Supprimer ou garder seulement les erreurs |
-
-### 3. Architecture Next.js
-
-| Fichier | Ligne | Sévérité | Problème Détecté | Suggestion Technique |
-| :--- | :---: | :---: | :--- | :--- |
-| `components/sections/FeaturedWork.tsx` | 48-89 | 🟠 Important | `useEffect` sans dépendances - Fetch côté client | Déplacer le fetch vers Server Component ou API Route |
-
-### 4. CSS & UI (Tailwind)
-
-| Fichier | Ligne | Sévérité | Problème Détecté | Suggestion Technique |
-| :--- | :---: | :---: | :--- | :--- |
-| `components/forms/contact-form.tsx` | 297 | 🟠 Important | `min-h-[150px]` - Valeur arbitraire | Utiliser `min-h-36` (144px) ou `min-h-40` (160px) |
-| `components/sections/Navbar.tsx` | 151 | 🟠 Important | `w-[300px] sm:w-[400px]` - Valeurs arbitraires | Utiliser `w-80 sm:w-96` (320px/384px) ou `max-w-sm sm:max-w-md` |
+| Fichier | Ligne (approx) | Sévérité | Problème détecté | Suggestion technique |
+|---------|----------------|----------|------------------|----------------------|
+| [app/about/AboutContent.tsx](app/about/AboutContent.tsx) | 84, 89, 115 | Critique | `key={childIndex}` et `key={\`${blockId}-item-${itemIndex}\`}` – index utilisé comme key dans les listes de blocs | Utiliser un ID stable par bloc/enfant (ex. hash du contenu ou `block.id` si fourni par Strapi) |
+| [components/sections/Trust.tsx](components/sections/Trust.tsx) | 67 | Critique | `key={point.title}` – risque de collision si deux points ont le même titre | Utiliser `point.id` ou combinaison stable (ex. `title` + index seulement si liste non réordonnable) |
 
 ---
 
-## 🟡 PROBLÈMES MINEURS
+## Problèmes importants
 
-### 5. Performance & Rendu
+### Performance & Rendu (images)
 
-| Fichier | Ligne | Sévérité | Problème Détecté | Suggestion Technique |
-| :--- | :---: | :---: | :--- | :--- |
-| `components/sections/Navbar.tsx` | 48-50 | 🟡 Mineur | `useEffect` avec dépendances vides - OK mais pourrait être optimisé | Vérifier si `mounted` est vraiment nécessaire |
-| `components/ClientHydrationFix.tsx` | 10-31 | 🟡 Mineur | `useEffect` avec dépendances vides - OK | Composant peut être supprimé si les extensions ne causent plus de problèmes |
+| Fichier | Ligne (approx) | Sévérité | Problème détecté | Suggestion technique |
+|---------|----------------|----------|------------------|----------------------|
+| [components/sections/Services.tsx](components/sections/Services.tsx) | 134 | Important | `<img>` utilisé pour localhost au lieu de `<Image />` | Utiliser `<Image />` avec `unoptimized` pour les URLs localhost pour cohérence et LCP |
+| [components/sections/TechStack.tsx](components/sections/TechStack.tsx) | 193, 211 | Important | `<img>` pour localhost et pour SimpleIcons CDN | Remplacer par `<Image />` (next/image) avec `width`, `height`, `alt` ; pour SimpleIcons, ajouter le domaine dans `remotePatterns` si besoin |
+| [components/ui/project-grid.tsx](components/ui/project-grid.tsx) | 79 | Important | `<img>` pour localhost | Remplacer par `<Image />` avec `unoptimized` |
+| [app/about/AboutContent.tsx](app/about/AboutContent.tsx) | 207 | Important | `<img>` pour photo de profil (localhost) | Remplacer par `<Image />` |
+| [app/work/[slug]/page.tsx](app/work/[slug]/page.tsx) | 358 | Important | `<img>` pour cover (localhost) | Remplacer par `<Image />` |
 
-### 6. Qualité du Code
+### Qualité Code & TypeScript (`any`)
 
-| Fichier | Ligne | Sévérité | Problème Détecté | Suggestion Technique |
-| :--- | :---: | :---: | :--- | :--- |
-| `components/sections/Hero.tsx` | 42-46 | 🟡 Mineur | Code dupliqué : `titleText.trim()` appelé deux fois | Supprimer la duplication |
-| `components/sections/Process.tsx` | 90-121 | 🟡 Mineur | Logique de mapping complexe et répétitive | Extraire dans une fonction utilitaire |
-| `app/page.tsx` | 261-401 | 🟡 Mineur | Fonction `renderSection` très longue (140 lignes) | Diviser en fonctions plus petites par type de section |
-| `app/contact/ContactContent.tsx` | 73 | 🟡 Mineur | `h-[600px]` - Valeur arbitraire | Utiliser `h-[37.5rem]` ou classe Tailwind standard |
+| Fichier | Ligne (approx) | Sévérité | Problème détecté | Suggestion technique |
+|---------|----------------|----------|------------------|----------------------|
+| [components/sections/FeaturedWorkServer.tsx](components/sections/FeaturedWorkServer.tsx) | 20-24 | Important | `(itemData as any)` pour Title, Slug, etc. | Typage explicite avec interface dérivée de `StrapiProject` / attributes |
+| [components/sections/NavbarServer.tsx](components/sections/NavbarServer.tsx) | 73-74 | Important | `(nav as any).links` / `(nav as any).items` | Définir une interface pour la structure `navigation` (ex. `{ links?: StrapiNavigationItem[] }`) |
+| [app/about/AboutContent.tsx](app/about/AboutContent.tsx) | 80 | Important | `child as any` dans le rendu des blocs | Typage strict pour les enfants de blocs (StrapiBlockChild) |
+| [app/work/[slug]/page.tsx](app/work/[slug]/page.tsx) | 203-309 | Important | Nombreux `(projectData as any)` et `(section as any)` | Extraire les champs via une fonction/helper typée ou étendre `StrapiProject` |
+| [lib/types/strapi.ts](lib/types/strapi.ts) | 105, 117, 155-156, 178, 189 | Important | `[key: string]: any` et `content?: any` | Remplacer par `unknown` ou interfaces plus précises pour les blocs |
+| [lib/icons.ts](lib/icons.ts) | 49, 68 | Important | `(LucideIcons as any)[variant]` | Utiliser un type d’index typé (ex. `keyof typeof LucideIcons`) |
 
----
+### Keys stables (fallback sur index)
 
-## ✅ POINTS POSITIFS
+| Fichier | Ligne (approx) | Sévérité | Problème détecté | Suggestion technique |
+|---------|----------------|----------|------------------|----------------------|
+| [components/sections/Services.tsx](components/sections/Services.tsx) | 118 | Important | `stableId` utilise `index` en fallback : `` `expertise-${...}-${index}` `` | Préférer un identifiant Strapi (`expertise.id`) ou combinaison sans index (ex. title + icon_name) |
+| [components/sections/TechStack.tsx](components/sections/TechStack.tsx) | 181 | Important | `uniqueKey` inclut `Math.floor(index / tools.length)` – dépendance à l’index | Utiliser `tool.id` ou `tool.tool_name` + un suffixe stable si besoin de duplication |
 
-1. ✅ **Images** : Utilisation correcte de `next/image` avec fallback `<img>` pour localhost (justifié)
-2. ✅ **Server Components** : Bonne séparation Server/Client (`NavbarServer`, pages async)
-3. ✅ **Error Handling** : Présence de try/catch et fallbacks dans la plupart des fetch
-4. ✅ **Null Safety** : Vérifications `?.` présentes dans plusieurs endroits
+### CSS & Tailwind
 
----
-
-## 📋 ACTIONS PRIORITAIRES
-
-### 🔴 URGENT (Avant Production)
-
-1. **Remplacer toutes les keys basées sur `index`** par des IDs stables (Strapi `id` ou combinaison unique)
-2. **Supprimer tous les `console.log`** de debug (47 occurrences détectées)
-3. **Remplacer tous les `any`** par des interfaces TypeScript strictes (21 occurrences)
-
-### 🟠 IMPORTANT (Prochaine Itération)
-
-4. **Créer interfaces Strapi réutilisables** : `StrapiMedia`, `StrapiBlocks`, `StrapiProject`
-5. **Supprimer code dupliqué** : Fonction `getLucideIcon` dans `Arguments.tsx` (déjà dans `lib/icons.ts`)
-6. **Optimiser FeaturedWork** : Déplacer fetch vers Server Component
-7. **Remplacer valeurs Tailwind arbitraires** par classes standard
-
-### 🟡 AMÉLIORATION (Nice to Have)
-
-8. **Refactoriser `renderSection`** : Diviser en fonctions plus petites
-9. **Simplifier logique de mapping** dans Process.tsx
-10. **Évaluer nécessité** de `ClientHydrationFix`
+| Fichier | Ligne (approx) | Sévérité | Problème détecté | Suggestion technique |
+|---------|----------------|----------|------------------|----------------------|
+| [app/contact/ContactContent.tsx](app/contact/ContactContent.tsx) | 73 | Important | `h-[37.5rem]` – valeur arbitraire | Remplacer par une classe du design system (ex. `h-[600px]` ou `min-h-[theme(spacing.96)]`) |
 
 ---
 
-## 📊 CONCLUSION GLOBALE
+## Problèmes mineurs
 
-**État de santé du projet :** 🟠 **ATTENTION REQUISE**
-
-Le code présente une **base solide** mais nécessite des **corrections critiques** avant la mise en production :
-
-- **8 problèmes critiques** liés aux keys React (risque de bugs de rendu)
-- **21 problèmes importants** (typage, logs, architecture)
-- **7 problèmes mineurs** (optimisations)
-
-**Recommandation :** Corriger les problèmes 🔴 et 🟠 avant le déploiement en production.
+| Fichier | Ligne (approx) | Sévérité | Problème détecté | Suggestion technique |
+|---------|----------------|----------|------------------|----------------------|
+| [app/page.tsx](app/page.tsx) | 271 | Mineur | `contentSections.map((section, index) => renderSection(section, index))` – la key est sur l’élément retourné par `renderSection` (OK) ; s’assurer que `section.id` est toujours renseigné côté Strapi pour éviter le fallback avec index | Documenter ou garantir la présence de `id` dans les sections de la Dynamic Zone |
+| [components/sections/Arguments.tsx](components/sections/Arguments.tsx) | 91 | Mineur | `stableId` utilise `index` en dernier recours : `` `argument-${...}-${iconName \|\| index}` `` | Idéalement utiliser `argument.id` Strapi uniquement |
+| [components/ui/project-grid.tsx](components/ui/project-grid.tsx) | 27 | Mineur | `stableKey` utilise `index` en fallback – acceptable si `slug` toujours présent | S’assurer que les projets Strapi ont un `slug` unique |
+| [cms/](cms/) | schemas | Mineur | Global (Strapi) : le schéma lu n’inclut pas `navigation` ; le frontend utilise `globalData?.navigation` | Vérifier en admin Strapi que le type Global expose bien un champ `navigation` (plugin ou extension) ; sinon aligner le schéma |
 
 ---
 
-**Rapport généré le :** 2026-01-22  
-**Auditeur :** Tech Lead Senior (Protocole Zero Tolerance)
+## Points conformes ou déjà en place
+
+- **Hooks :** Les `useEffect` (Navbar, ClientHydrationFix) ont un tableau de dépendances `[]` explicite et approprié.
+- **Pas de `console.log`** dans le code applicatif (hors `console.error` dans l’API route projects).
+- **Fetch / cache :** Les appels Strapi utilisent `next: { revalidate: 60 }` ; pas de token en dur (usage de `process.env.NEXT_PUBLIC_STRAPI_API_URL`, `NEXT_PUBLIC_WEB3FORMS_KEY`).
+- **Fail-safe :** `getHomePage`, `getGlobal`, `getAbout`, `getContact`, `getCollection` sont dans des try/catch et retournent `null` ou gèrent l’erreur ; les pages utilisent des fallbacks (ex. `contentSections = []`, `notFound()` pour projet absent).
+- **Null safety :** Usage cohérent de `?.` et fallbacks (ex. `globalData?.siteName`, `response?.data`).
+- **Backend :** Aucun token ou secret en dur dans le code ; schémas sans relation circulaire évidente ; Contact n’expose pas de donnée sensible (email_placeholder = texte de placeholder).
+
+---
+
+## Conclusion
+
+Le projet est globalement en bon état : pas de dette critique bloquante, bonne gestion des erreurs et du cache côté Strapi, et pas d’exposition de secrets. Les deux points **critiques** à traiter en priorité sont l’usage d’**index dans les keys** (AboutContent, Trust), pour éviter des bugs de rendu et de réconciliation React. Vient ensuite la **removal des `<img>`** au profit de `next/image` partout (Important), puis la **réduction des `any`** (types Strapi et helpers) pour améliorer la maintenabilité et limiter les régressions. Les points mineurs (fallbacks sur index dans quelques keys, valeur Tailwind arbitraire, schéma Global) peuvent être traités progressivement. Recommandation : corriger d’abord les keys et les images, puis typage Strapi et lib/icons.

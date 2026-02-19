@@ -3,27 +3,8 @@ import { StrapiProject } from "@/lib/types/strapi";
 import { FeaturedWork } from "./FeaturedWork";
 import { Project } from "@/components/ui/project-grid";
 
-// Fallback data si Strapi n'est pas disponible
-const FALLBACK_PROJECTS: Project[] = [
-  {
-    title: "SaaS Dashboard",
-    description: "Tableau de bord analytique pour une startup SaaS avec intégration temps réel.",
-    slug: "saas-dashboard",
-  },
-  {
-    title: "E-commerce Auto",
-    description: "Plateforme e-commerce complète pour un concessionnaire automobile avec gestion de stock.",
-    slug: "ecommerce-auto",
-  },
-  {
-    title: "Refonte Corporate",
-    description: "Refonte complète du site web d'une entreprise avec migration vers Next.js et Strapi.",
-    slug: "refonte-corporate",
-  },
-];
-
 export async function FeaturedWorkServer() {
-  let projects: Project[] = FALLBACK_PROJECTS;
+  let projects: Project[] = [];
 
   try {
     const response = await getCollection<StrapiProject>('projects', {
@@ -33,19 +14,25 @@ export async function FeaturedWorkServer() {
     });
 
     if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
+      type ProjectAttrs = Pick<StrapiProject, "Title" | "title" | "Slug" | "slug" | "Description" | "description" | "Summary" | "summary" | "Cover" | "cover">;
       projects = response.data.map((item) => {
-        const itemData = (item as StrapiProject).attributes || item;
+        const raw = item as StrapiProject & { attributes?: ProjectAttrs };
+        const itemData: ProjectAttrs = raw.attributes ?? (raw as unknown as ProjectAttrs);
         return {
-          title: (itemData as any).Title || (itemData as any).title || 'Sans titre',
-          slug: (itemData as any).Slug || (itemData as any).slug || '',
-          description: (itemData as any).Description || (itemData as any).description,
-          summary: (itemData as any).Summary || (itemData as any).summary,
-          cover: (itemData as any).Cover || (itemData as any).cover,
+          title: itemData.Title ?? itemData.title ?? "Sans titre",
+          slug: itemData.Slug ?? itemData.slug ?? "",
+          description: itemData.Description ?? itemData.description,
+          summary: itemData.Summary ?? itemData.summary,
+          cover: itemData.Cover ?? itemData.cover,
         };
       });
     }
-  } catch (error) {
-    // Erreur silencieuse, utiliser fallback
+  } catch {
+    // Erreur silencieuse, pas de section
+  }
+
+  if (projects.length === 0) {
+    return null;
   }
 
   return <FeaturedWork projects={projects} />;

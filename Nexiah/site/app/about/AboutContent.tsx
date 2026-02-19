@@ -77,16 +77,17 @@ function BioContentRenderer({ content }: { content: StrapiBlocksContent }) {
             return (
               <p key={blockId} className="text-base text-muted-foreground leading-relaxed">
                {block.children.map((child, childIndex: number) => {
-                 const childAny = child as any;
+                 const childAny = child as { type?: string; text?: string; bold?: boolean };
+                 const childKey = `${blockId}-c-${childIndex}-${String(childAny.text ?? "").slice(0, 15)}`;
 
                   // Un seul bloc suffit pour gérer le gras
-                  if (childAny.type === 'text' && childAny.bold) {
-                  return <strong key={childIndex}>{childAny.text}</strong>;
+                  if (childAny.type === "text" && childAny.bold) {
+                  return <strong key={childKey}>{childAny.text}</strong>;
                    }
 
                    // Si c'est du texte normal (pas gras)
-                   if (childAny.type === 'text') {
-                    return <span key={childIndex}>{childAny.text}</span>;
+                   if (childAny.type === "text") {
+                    return <span key={childKey}>{childAny.text}</span>;
   }
 
   return null;
@@ -111,13 +112,15 @@ function BioContentRenderer({ content }: { content: StrapiBlocksContent }) {
             const ListTag = block.format === 'ordered' ? 'ol' : 'ul';
             return (
               <ListTag key={blockId} className="list-disc list-inside space-y-2 text-base text-muted-foreground">
-                {block.children.map((item, itemIndex: number) => (
-                  <li key={`${blockId}-item-${itemIndex}`}>
-                    {item.children?.map((child, childIndex: number) => 
-                      child.type === 'text' ? child.text : ''
-                    ).join('')}
-                  </li>
-                ))}
+                {block.children.map((item, itemIndex: number) => {
+                  const itemText = item.children?.map((child) => (child.type === "text" ? child.text : "")).join("") ?? "";
+                  const itemKey = `${blockId}-item-${itemText.slice(0, 30)}-${itemIndex}`;
+                  return (
+                    <li key={itemKey}>
+                      {itemText}
+                    </li>
+                  );
+                })}
               </ListTag>
             );
           }
@@ -203,21 +206,14 @@ export function AboutContent({ aboutData }: AboutContentProps) {
           >
             {profilePictureUrl ? (
               <div className="relative w-full max-w-md aspect-square rounded-2xl shadow-xl overflow-hidden">
-                {profilePictureUrl.includes('localhost') ? (
-                  <img
-                    src={profilePictureUrl}
-                    alt="Jonas - Product Builder"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Image
-                    src={profilePictureUrl}
-                    alt="Jonas - Product Builder"
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                )}
+                <Image
+                  src={profilePictureUrl}
+                  alt="Jonas - Product Builder"
+                  fill
+                  className="object-cover"
+                  unoptimized={profilePictureUrl.includes("localhost")}
+                  sizes="(max-width: 768px) 100vw, 28rem"
+                />
               </div>
             ) : (
               <div className="bg-slate-200 aspect-square w-full max-w-md rounded-2xl" />

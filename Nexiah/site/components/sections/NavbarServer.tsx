@@ -1,6 +1,7 @@
-import { getGlobal } from "@/lib/strapi";
+import { getGlobal, getCollection } from "@/lib/strapi";
 import { Navbar } from "./Navbar";
 import { StrapiMedia, StrapiNavigationItem } from "@/lib/types/strapi";
+import { StrapiProject } from "@/lib/types/strapi";
 
 // Interface pour les données de navigation
 export interface NavigationLink {
@@ -67,10 +68,11 @@ export async function NavbarServer() {
         })
         .filter((link: NavigationLink) => link.href && link.label);
     }
-    // Si c'est un champ JSON
-    else if (typeof nav === 'object' && nav !== null) {
-      if (Array.isArray((nav as any).links) || Array.isArray((nav as any).items)) {
-        const links = (nav as any).links || (nav as any).items;
+    // Si c'est un champ JSON (structure Strapi ou custom)
+    else if (typeof nav === "object" && nav !== null) {
+      const navObj = nav as { links?: StrapiNavigationItem[]; items?: StrapiNavigationItem[] };
+      if (Array.isArray(navObj.links) || Array.isArray(navObj.items)) {
+        const links = navObj.links ?? navObj.items ?? [];
         navigationLinks = links
           .map((item: StrapiNavigationItem) => ({
             href: item.href || item.url || '',
@@ -84,6 +86,25 @@ export async function NavbarServer() {
     if (navigationLinks.length === 0) {
       navigationLinks = DEFAULT_NAVIGATION_LINKS;
     }
+  }
+
+  // Masquer le lien "Réalisations" s'il n'y a aucun projet
+  let hasProjects = false;
+  try {
+    const projectsResponse = await getCollection<StrapiProject>("projects", {
+      limit: 1,
+    });
+    hasProjects =
+      Boolean(projectsResponse?.data) &&
+      Array.isArray(projectsResponse.data) &&
+      projectsResponse.data.length > 0;
+  } catch {
+    // Erreur silencieuse, on garde le lien
+  }
+  if (!hasProjects) {
+    navigationLinks = navigationLinks.filter(
+      (link) => link.href !== "/work" && link.href !== "/work/"
+    );
   }
 
   return (

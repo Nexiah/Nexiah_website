@@ -176,9 +176,9 @@ export function TechStack({
           >
             {allTools.map((tool, index) => {
               const smartIcon = getSmartIcon(tool);
-              const toolName = tool.name || 'Tool';
-              // Pour la duplication, ajouter un suffixe unique
-              const uniqueKey = `${tool.id}-${Math.floor(index / tools.length)}`;
+              const toolName = tool.name || tool.tool_name || "Tool";
+              const baseId = tool.id ?? tool.tool_name ?? tool.name;
+              const uniqueKey = baseId != null ? `${String(baseId)}-${Math.floor(index / tools.length)}` : `tool-${toolName.slice(0, 20)}-${index}`;
 
               return (
                 <div
@@ -187,32 +187,24 @@ export function TechStack({
                 >
                   {/* Rendu de l'icône selon le type */}
                   {smartIcon.type === 'custom' && smartIcon.imageUrl ? (
-                    // Priorité 1 : Image custom
                     <div className="relative h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center">
-                      {smartIcon.imageUrl.includes('localhost') ? (
-                        <img
-                          src={smartIcon.imageUrl}
-                          alt={toolName}
-                          className="h-12 w-12 sm:h-14 sm:w-14 object-contain group-hover:scale-110 transition-transform duration-300"
-                        />
-                      ) : (
-                        <Image
-                          src={smartIcon.imageUrl}
-                          alt={toolName}
-                          width={56}
-                          height={56}
-                          className="h-12 w-12 sm:h-14 sm:w-14 object-contain group-hover:scale-110 transition-transform duration-300"
-                          unoptimized
-                        />
-                      )}
+                      <Image
+                        src={smartIcon.imageUrl}
+                        alt={toolName}
+                        width={56}
+                        height={56}
+                        className="h-12 w-12 sm:h-14 sm:w-14 object-contain group-hover:scale-110 transition-transform duration-300"
+                        unoptimized={smartIcon.imageUrl.includes("localhost")}
+                      />
                     </div>
                   ) : smartIcon.type === 'simpleicons' && smartIcon.imageUrl ? (
-                    // Priorité 2 : SimpleIcons CDN (couleurs officielles)
-                    <img
+                    <Image
                       src={smartIcon.imageUrl}
                       alt={toolName}
+                      width={56}
+                      height={56}
                       className="h-12 w-12 sm:h-14 sm:w-14 object-contain group-hover:scale-110 transition-transform duration-300"
-                      loading="lazy"
+                      unoptimized
                     />
                   ) : smartIcon.type === 'fallback' && smartIcon.iconComponent ? (
                     // Fallback : Icône Lucide

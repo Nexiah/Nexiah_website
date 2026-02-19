@@ -10,7 +10,7 @@ interface FeaturedWorkProps {
 export function FeaturedWork({ projects }: FeaturedWorkProps) {
 
   return (
-    <section id="realisations" className="w-full bg-white py-24 sm:py-32">
+    <section id="realisations" className="w-full bg-slate-50 py-24 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center mb-16">
           <motion.h2

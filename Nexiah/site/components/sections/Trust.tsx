@@ -62,9 +62,10 @@ export function Trust({ title, arguments: args }: TrustProps = {}) {
         <div className="grid gap-8 md:grid-cols-3">
           {displayArguments.map((point, index) => {
             const Icon = point.icon;
+            const pointKey = point.title ? `trust-${String(point.title).slice(0, 40)}-${index}` : `trust-${index}`;
             return (
               <motion.div
-                key={point.title}
+                key={pointKey}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

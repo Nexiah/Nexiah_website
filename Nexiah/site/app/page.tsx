@@ -2,7 +2,6 @@ import { NavbarServer } from "@/components/sections/NavbarServer";
 import { Hero } from "@/components/sections/Hero";
 import { Services } from "@/components/sections/Services";
 import { Process } from "@/components/sections/Process";
-import { TechStack } from "@/components/sections/TechStack";
 import { FeaturedWorkServer } from "@/components/sections/FeaturedWorkServer";
 import { Trust } from "@/components/sections/Trust";
 import { Arguments } from "@/components/sections/Arguments";
@@ -227,33 +226,8 @@ function renderSection(section: ContentSection, index: number) {
 
     case "section.tool":
     case "section.tools":
-      // Structure : title_section, description_section, tools_list (tableau répétable)
-      // Gérer les différents formats de champs (PascalCase vs camelCase)
-      const toolTitle = section.title_section || section.TitleSection || section.title || section.Title || '';
-      const toolDescription = section.description_section || section.DescriptionSection || section.description || section.Description || '';
-      
-      // Récupérer tools_list (tableau répétable)
-      let toolsList = section.tools_list || section.ToolsList || [];
-      
-      // S'assurer que c'est un tableau
-      if (!Array.isArray(toolsList)) {
-        toolsList = [];
-      }
-      
-      // Générer un ID stable pour la key
-      const toolKey = section.id || `tool-${toolTitle.slice(0, 20).replace(/\s+/g, '-')}-${index}`;
-      
-      return (
-        <TechStack
-          key={toolKey}
-          title_section={toolTitle}
-          description_section={toolDescription}
-          tools_list={toolsList}
-          // Support des anciens noms pour compatibilité
-          title={section.title}
-          description={section.description}
-        />
-      );
+      // Section "Mes outils de prédilection" désactivée
+      return null;
 
     default:
       // Si le composant n'est pas reconnu, ne rien afficher
@@ -288,7 +262,6 @@ export default async function Home() {
             <Hero />
             <Services />
             <Process />
-            <TechStack />
             <FeaturedWorkServer />
             <Trust />
           </>

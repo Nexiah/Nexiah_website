@@ -44,10 +44,11 @@ export function getLucideIcon(
   ];
 
   // Recherche dans les exports de lucide-react
+  const iconsRecord = LucideIcons as Record<string, unknown>;
   for (const variant of variants) {
-    if (variant in LucideIcons) {
-      const IconComponent = (LucideIcons as any)[variant];
-      if (typeof IconComponent === 'function') {
+    if (variant in iconsRecord) {
+      const IconComponent = iconsRecord[variant];
+      if (typeof IconComponent === "function") {
         return IconComponent as LucideIcon;
       }
     }
@@ -65,8 +66,8 @@ export function getLucideIcon(
   });
 
   if (foundKey) {
-    const IconComponent = (LucideIcons as any)[foundKey];
-    if (typeof IconComponent === 'function') {
+    const IconComponent = iconsRecord[foundKey];
+    if (typeof IconComponent === "function") {
       return IconComponent as LucideIcon;
     }
   }

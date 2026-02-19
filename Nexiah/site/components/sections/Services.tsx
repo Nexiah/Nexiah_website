@@ -114,8 +114,8 @@ export function Services({
               const smartIcon = getSmartIcon(expertise);
               const title = expertise.title_expertise || '';
               const description = expertise.description_expertise || '';
-              // Générer un ID stable : utiliser id Strapi si disponible, sinon combinaison title + index
-              const stableId = expertise.id || `expertise-${title.replace(/\s+/g, '-').slice(0, 30)}-${index}`;
+              const iconName = expertise.icon_name ?? expertise.icon_pic ? "icon" : "";
+              const stableId = expertise.id ?? `expertise-${title.replace(/\s+/g, "-").slice(0, 30)}-${iconName}-${index}`;
 
               return (
                 <motion.div
@@ -130,22 +130,14 @@ export function Services({
                       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                         {smartIcon.type === 'image' && smartIcon.imageUrl ? (
                           <div className="relative h-6 w-6">
-                            {smartIcon.imageUrl.includes('localhost') ? (
-                              <img
-                                src={smartIcon.imageUrl}
-                                alt={title || 'Expertise'}
-                                className="h-6 w-6 object-contain"
-                              />
-                            ) : (
-                              <Image
-                                src={smartIcon.imageUrl}
-                                alt={title || 'Expertise'}
-                                width={24}
-                                height={24}
-                                className="h-6 w-6 object-contain"
-                                unoptimized
-                              />
-                            )}
+                            <Image
+                              src={smartIcon.imageUrl}
+                              alt={title || "Expertise"}
+                              width={24}
+                              height={24}
+                              className="h-6 w-6 object-contain"
+                              unoptimized={smartIcon.imageUrl.includes("localhost")}
+                            />
                           </div>
                         ) : smartIcon.type === 'lucide' && smartIcon.iconComponent ? (
                           <smartIcon.iconComponent className="h-6 w-6 text-primary" />

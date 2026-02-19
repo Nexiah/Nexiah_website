@@ -54,7 +54,7 @@ export function Arguments({
   }
 
   return (
-    <section className="w-full bg-white py-24 sm:py-32">
+    <section className="w-full bg-slate-50 py-24 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center mb-16">
           <motion.h2
@@ -88,7 +88,7 @@ export function Arguments({
             // Utiliser icon_name en priorité, puis les variantes
             const iconName = argument.icon_name || argument.IconName || argument.icon || argument.Icon;
             // Générer un ID stable : utiliser id Strapi si disponible, sinon combinaison title + icon
-            const stableId = argument.id || `argument-${argumentTitle.replace(/\s+/g, '-').slice(0, 30)}-${iconName || index}`;
+            const stableId = argument.id ?? `argument-${argumentTitle.replace(/\s+/g, "-").slice(0, 30)}-${String(iconName || "").slice(0, 20)}-${index}`;
             
             // Obtenir l'icône Lucide
             const IconComponent = getLucideIcon(iconName, Check);

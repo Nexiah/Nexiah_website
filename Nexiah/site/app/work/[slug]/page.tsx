@@ -353,25 +353,17 @@ export default async function ProjectDetailPage({
           {formattedCoverUrl && (
             <div className="mb-16">
               <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted">
-              {formattedCoverUrl.includes('localhost') ? (
-                // Pour localhost, utiliser img standard directement
-                <img
-                  src={formattedCoverUrl}
-                  alt={coverAlt || title}
-                  className="absolute inset-0 w-full h-full object-cover rounded-lg"
-                />
-              ) : (
-                // Pour les autres URLs, utiliser next/image
                 <Image
                   src={formattedCoverUrl}
                   alt={coverAlt || title}
                   fill
-                  className="object-cover"
+                  className="object-cover rounded-lg"
+                  unoptimized={formattedCoverUrl.includes("localhost")}
+                  sizes="(max-width: 768px) 100vw, 1024px"
                 />
-              )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
           {/* Contenu */}
           <div className="space-y-12">

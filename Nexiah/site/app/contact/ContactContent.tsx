@@ -70,7 +70,7 @@ export function ContactContent({ contactData }: ContactContentProps) {
             <h2 className="text-2xl font-semibold mb-6">Réservez un créneau</h2>
             <iframe
               src={calBookingUrl}
-              className="w-full h-[37.5rem] rounded-2xl bg-muted/50 border-0"
+              className="w-full min-h-[36rem] rounded-2xl bg-muted/50 border-0"
               title="Cal.com Booking"
               loading="lazy"
             />
