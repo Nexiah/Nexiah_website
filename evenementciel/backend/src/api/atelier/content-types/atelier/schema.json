@@ -1,0 +1,101 @@
+{
+  "kind": "collectionType",
+  "collectionName": "ateliers",
+  "info": {
+    "singularName": "atelier",
+    "pluralName": "ateliers",
+    "displayName": "Atelier",
+    "description": "Atelier ou animation du catalogue"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "titre": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "titre",
+      "required": true
+    },
+    "resume": {
+      "type": "text",
+      "required": true,
+      "maxLength": 220
+    },
+    "description": {
+      "type": "blocks"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "theme": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::theme.theme",
+      "inversedBy": "ateliers"
+    },
+    "publics": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::public-cible.public-cible",
+      "inversedBy": "ateliers"
+    },
+    "duree": {
+      "type": "string",
+      "required": true
+    },
+    "participants": {
+      "type": "string",
+      "required": true
+    },
+    "niveau": {
+      "type": "enumeration",
+      "enum": [
+        "Tous niveaux",
+        "Adapté",
+        "Avancé"
+      ],
+      "default": "Tous niveaux"
+    },
+    "tarifIndicatif": {
+      "type": "string"
+    },
+    "benefices": {
+      "type": "component",
+      "component": "atelier.element-liste",
+      "repeatable": true
+    },
+    "objectifs": {
+      "type": "component",
+      "component": "atelier.element-liste",
+      "repeatable": true
+    },
+    "materielFourni": {
+      "type": "component",
+      "component": "atelier.element-liste",
+      "repeatable": true
+    },
+    "prerequis": {
+      "type": "component",
+      "component": "atelier.element-liste",
+      "repeatable": true
+    },
+    "misEnAvant": {
+      "type": "boolean",
+      "default": false
+    },
+    "demandes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::demande.demande",
+      "mappedBy": "atelier"
+    }
+  }
+}

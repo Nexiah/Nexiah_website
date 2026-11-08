@@ -1,0 +1,107 @@
+{
+  "kind": "collectionType",
+  "collectionName": "demandes",
+  "info": {
+    "singularName": "demande",
+    "pluralName": "demandes",
+    "displayName": "Demande",
+    "description": "Demande d'atelier envoyée depuis le site"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "reference": {
+      "type": "string",
+      "unique": true
+    },
+    "statut": {
+      "type": "enumeration",
+      "enum": [
+        "Nouvelle",
+        "Recherche prestataire",
+        "Confirmée",
+        "Réalisée",
+        "Payée",
+        "Annulée"
+      ],
+      "default": "Nouvelle",
+      "required": true
+    },
+    "atelier": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::atelier.atelier",
+      "inversedBy": "demandes"
+    },
+    "etablissement": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::etablissement.etablissement",
+      "inversedBy": "demandes"
+    },
+    "typeEtablissement": {
+      "type": "enumeration",
+      "enum": [
+        "EHPAD",
+        "Résidence autonomie",
+        "Mairie / collectivité",
+        "Entreprise",
+        "Autre"
+      ],
+      "required": true
+    },
+    "nomEtablissement": {
+      "type": "string",
+      "required": true
+    },
+    "prenom": {
+      "type": "string",
+      "required": true
+    },
+    "nom": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "telephone": {
+      "type": "string",
+      "required": true
+    },
+    "ville": {
+      "type": "string",
+      "required": true
+    },
+    "dateSouhaitee": {
+      "type": "date",
+      "required": true
+    },
+    "dateAlternative": {
+      "type": "date"
+    },
+    "nombreParticipants": {
+      "type": "integer",
+      "min": 1,
+      "required": true
+    },
+    "message": {
+      "type": "text"
+    },
+    "consentement": {
+      "type": "boolean",
+      "required": true
+    },
+    "prestataire": {
+      "type": "string"
+    },
+    "dateConfirmee": {
+      "type": "date"
+    },
+    "notesInternes": {
+      "type": "text"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "themes",
+  "info": {
+    "singularName": "theme",
+    "pluralName": "themes",
+    "displayName": "Thème",
+    "description": "Thématique d'atelier (Bien-être, Créatif…)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "couleurFond": {
+      "type": "string",
+      "regex": "^#[0-9A-Fa-f]{6}$",
+      "default": "#EEF5FB"
+    },
+    "couleurTexte": {
+      "type": "string",
+      "regex": "^#[0-9A-Fa-f]{6}$",
+      "default": "#075690"
+    },
+    "ordre": {
+      "type": "integer",
+      "default": 0
+    },
+    "ateliers": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::atelier.atelier",
+      "mappedBy": "theme"
+    }
+  }
+}

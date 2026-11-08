@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@import "@fontsource/atkinson-hyperlegible/400.css";
+@import "@fontsource/atkinson-hyperlegible/700.css";
+@import "@fontsource-variable/bricolage-grotesque/opsz.css";
+
+/*
+ * Thème Événement Ciel — tout le design passe par ces variables.
+ * Pour faire évoluer le design, c'est ici qu'il faut commencer.
+ */
+@theme {
+  --color-marque: #075690;
+  --color-marque-fonce: #054170;
+  --color-encre: #13293d;
+  --color-texte: #3a4a5c;
+  --color-discret: #5b6b7c;
+  --color-soleil: #f5b82e;
+  --color-ciel: #eef5fb;
+  --color-nuage: #d6e6f3;
+  --color-champ: #c5d9ea;
+  --color-pied: #13293d;
+  --color-pied-texte: #c9d6e2;
+
+  --font-sans: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-titre: "Bricolage Grotesque Variable", "Atkinson Hyperlegible", sans-serif;
+
+  --radius-carte: 20px;
+  --radius-bouton: 12px;
+}
+
+@layer base {
+  html {
+    font-size: 112.5%; /* 18 px : texte de base confortable pour notre public */
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-white font-sans text-encre leading-relaxed;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-titre text-encre;
+    text-wrap: balance;
+  }
+  a {
+    @apply text-marque;
+  }
+  a:hover {
+    @apply text-marque-fonce;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-soleil);
+    outline-offset: 2px;
+  }
+}
+
+/* Composants réutilisables */
+@utility conteneur {
+    @apply mx-auto w-full max-w-[1200px] px-6;
+  }
+
+@utility btn {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-bouton px-7 py-3 font-bold no-underline transition-colors;
+  }
+
+@utility btn-principal {
+    @apply btn bg-marque text-white hover:bg-marque-fonce hover:text-white;
+  }
+
+@utility btn-secondaire {
+    @apply btn border-2 border-marque bg-white text-marque hover:bg-ciel;
+  }
+
+@utility btn-soleil {
+    @apply btn bg-soleil text-encre hover:bg-[#e6a817] hover:text-encre;
+  }
+
+@utility champ {
+    @apply min-h-[50px] w-full min-w-0 rounded-bouton border-2 border-champ bg-white px-3.5 py-2.5 text-[0.95rem] text-encre focus:border-marque;
+  }
+
+@utility libelle {
+    @apply flex flex-col gap-1.5 text-[0.9rem] font-bold;
+  }
+
+@utility titre-section {
+    @apply text-[2.2rem] font-bold leading-tight tracking-tight;
+  }

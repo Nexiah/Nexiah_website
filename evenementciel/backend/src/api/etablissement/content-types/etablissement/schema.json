@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "etablissements",
+  "info": {
+    "singularName": "etablissement",
+    "pluralName": "etablissements",
+    "displayName": "Établissement",
+    "description": "Client : EHPAD, résidence, mairie, entreprise"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "nom": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "EHPAD",
+        "Résidence autonomie",
+        "Mairie / collectivité",
+        "Entreprise",
+        "Autre"
+      ],
+      "required": true
+    },
+    "ville": {
+      "type": "string"
+    },
+    "adresse": {
+      "type": "text"
+    },
+    "telephone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "demandes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::demande.demande",
+      "mappedBy": "etablissement"
+    }
+  }
+}
