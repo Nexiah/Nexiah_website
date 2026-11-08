@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_atelier_elements_liste",
+  "info": {
+    "displayName": "Élément de liste",
+    "icon": "bulletList"
+  },
+  "options": {},
+  "attributes": {
+    "texte": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

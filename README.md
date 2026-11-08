@@ -6,9 +6,12 @@ Ce dépôt contient plusieurs projets, chacun dans son propre dossier.
 
 ```
 .
-├── Nexiah/       # Projet Nexiah
-│   ├── cms/      # Backend Strapi
-│   └── site/     # Frontend Next.js
+├── Nexiah/            # Projet Nexiah
+│   ├── cms/           # Backend Strapi
+│   └── site/          # Frontend Next.js
+├── evenementciel/     # Projet Événement Ciel (refonte evenementciel.net)
+│   ├── backend/       # Backend Strapi 5
+│   └── frontend/      # Frontend Next.js 16
 └── README.md
 ```
 
@@ -57,3 +60,25 @@ Next.js sera accessible sur http://localhost:3000
 2. Configurer les permissions dans Strapi Admin :
    - Settings → Users & Permissions → Roles → Public
    - Activer les permissions pour vos collections
+
+## Projet Événement Ciel
+
+Refonte du site evenementciel.net — catalogue d'ateliers pour EHPAD, résidences autonomie, collectivités et entreprises, avec demande d'atelier en ligne (sans paiement).
+
+Voir [evenementciel/README.md](evenementciel/README.md) et [evenementciel/CLAUDE.md](evenementciel/CLAUDE.md).
+
+### Démarrage
+
+```bash
+# Backend Strapi (http://localhost:1337/admin)
+cd evenementciel/backend
+cp .env.example .env   # puis remplacer les « tobemodified »
+npm install
+npm run develop
+
+# Frontend Next.js (http://localhost:3000)
+cd evenementciel/frontend
+cp .env.example .env.local
+npm install
+npm run dev
+```

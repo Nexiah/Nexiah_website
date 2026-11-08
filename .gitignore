@@ -42,6 +42,14 @@ Thumbs.db
 **/cms/build/
 **/cms/dist/
 **/cms/.strapi/
+**/backend/.tmp/
+**/backend/cache/
+**/backend/build/
+**/backend/dist/
+**/backend/.strapi/
+
+# Archives
+*.zip
 
 # Database
 *.db
